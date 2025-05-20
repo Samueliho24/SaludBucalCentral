@@ -12,6 +12,8 @@ import com.pas.saludbucalcentralbackend.database.dbConnection;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ApiServer {
     private static final int port = 8080;
@@ -20,11 +22,16 @@ public class ApiServer {
     private PrintWriter out;
     private BufferedReader in;
     
-    public static void httpServer() throws IOException{
-        serverSocket = new ServerSocket(port);
-        while(true){
-            clientSocket = serverSocket.accept();
-            new Thread(() -> handleClientRequest(clientSocket)).start();
+    public static void httpServer(){
+        try {
+            serverSocket = new ServerSocket(port);
+            while(true){
+                clientSocket = serverSocket.accept();
+                new Thread(() -> handleClientRequest(clientSocket)).start();
+                System.out.println("Iniciado back");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ApiServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

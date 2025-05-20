@@ -4,6 +4,8 @@ import java.io.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -36,23 +38,27 @@ public class dbConnection {
         return conexion;
     }
     
-    public static String login(String json) throws SQLException{
+    public static String login(String json){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
         String cedula = String.valueOf(new StringBuilder(dataUser.getString("cedula")));
         String password = String.valueOf(new StringBuilder(dataUser.getString("password")));
-        
-        PreparedStatement psmt = con.prepareStatement("SELECT name FROM usuarios WHERE cedula=? AND password=?");
-        psmt.setLong(1,Long.parseLong(cedula));
-        psmt.setString(2, password);
-        ResultSet rs =psmt.executeQuery();
-        
         JSONObject response = new JSONObject();
         
-        if(rs.next()){
-            response.put("success",true);
-        } else{
-            response.put("failed",false);
+        
+        try {
+            PreparedStatement psmt = con.prepareStatement("SELECT name FROM usuarios WHERE cedula=? AND password=?");
+            psmt.setLong(1,Long.parseLong(cedula));
+            psmt.setString(2, password);
+            ResultSet rs =psmt.executeQuery();
+               
+            if(rs.next()){
+                response.put("success",true);
+            } else{
+                response.put("failed",false);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
@@ -60,18 +66,24 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String registerUser(String json) throws SQLException{
+    public static String registerUser(String json){
         String[] jsonData = jsonString(json);
+        int userId = 0;
         //Creacion de la conexion
         con = conectar();
-        PreparedStatement psmt= con.prepareStatement("INSERT INTO usuarios (?) VALUES(?)",Statement.RETURN_GENERATED_KEYS);
-        psmt.setString(1, jsonData[0]);
-        psmt.setString(2, jsonData[1]);
-        psmt.executeUpdate();
+        try {
+            PreparedStatement psmt= con.prepareStatement("INSERT INTO usuarios (?) VALUES(?)",Statement.RETURN_GENERATED_KEYS);
+            psmt.setString(1, jsonData[0]);
+            psmt.setString(2, jsonData[1]);
+            psmt.executeUpdate();
+
+            userId = getLastInsertId(psmt);
+
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        int userId = getLastInsertId(psmt);
-        
-        con.close();
         
         JSONObject response = new JSONObject();
         response.put("success",true);
@@ -80,48 +92,63 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String syncUsersMobile() throws SQLException{
+    public static String syncUsersMobile(){
         con = conectar();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT cedula,name,password,type FROM usuario WHERE state=1");
-        
         JSONArray dataArray = new JSONArray();
-        while (rs.next()) {
-            JSONObject data = new JSONObject();
-            data.put("cedula", rs.getInt("cedula"));
-            data.put("name", rs.getString("name"));
-            data.put("password", rs.getString("password"));
-            data.put("type", rs.getString("type"));
-            dataArray.put(data);
+        JSONObject response = new JSONObject();
+        
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT cedula,name,password,type FROM usuario WHERE state=1");
+
+            while (rs.next()) {
+                JSONObject data = new JSONObject();
+                data.put("cedula", rs.getInt("cedula"));
+                data.put("name", rs.getString("name"));
+                data.put("password", rs.getString("password"));
+                data.put("type", rs.getString("type"));
+                dataArray.put(data);
+            }
+            response.put("success",true);
+            response.put("dataUsers",dataArray);
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
         
-        JSONObject response = new JSONObject();
-        response.put("success",true);
-        response.put("dataUsers",dataArray);
                 
         return response.toString();
     }
     
-    public static String receiverDataMobile(String json) throws SQLException{
+    public static String receiverDataMobile(String json){
         String[] jsonData = jsonString(json);
-        con = conectar();
-        PreparedStatement psmt= con.prepareStatement("INSERT INTO formulario (?) VALUES(?)");
-        psmt.setString(1, jsonData[0]);
-        psmt.setString(2, jsonData[1]);
-        psmt.executeUpdate();
-        
-        con.close();
         JSONObject response = new JSONObject();
-        response.put("success",true);
+        con = conectar();
+        try{
+            PreparedStatement psmt= con.prepareStatement("INSERT INTO formulario (?) VALUES(?)");
+            psmt.setString(1, jsonData[0]);
+            psmt.setString(2, jsonData[1]);
+            psmt.executeUpdate();
+
+            con.close();
+            
+            response.put("success",true);
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
         
         return response.toString();
     }
     
-    public static String exportArchiveCSV() throws FileNotFoundException, SQLException, IOException{
+    public static String exportArchiveCSV(){
         con = conectar();
+        JSONObject response = new JSONObject();
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM formulario");
+            
+        
         // Obtener todos los datos para exportar
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM formulario");
+        
         
         // Crear archivo CSV temporal
         File csvFile = File.createTempFile("export-", ".csv");
@@ -148,19 +175,26 @@ public class dbConnection {
         
         // Leer archivo CSV como texto
         String csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
-        
-        // Registrar en el historial
-        
-        JSONObject response = new JSONObject();
         response.put("success",true);
+        // Registrar en el historial
+        } catch (Exception e) {
+            
+        }
+        
+        
         
         return response.toString();
     }
     
-    private static int getLastInsertId(PreparedStatement stmt) throws SQLException {
-        ResultSet rs = stmt.getGeneratedKeys();
-        if (rs.next()) {
-            return rs.getInt(1);
+    private static int getLastInsertId(PreparedStatement stmt){
+        ResultSet rs;
+        try {
+            rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         return -1;
     }
