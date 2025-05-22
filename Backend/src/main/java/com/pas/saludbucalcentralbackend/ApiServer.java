@@ -36,6 +36,7 @@ public class ApiServer {
     }
     
     private static void handleClientRequest(Socket clientSocket) {
+	    System.out.println("HTTP: Handle Client: " + clientSocket.toString());
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
@@ -57,18 +58,21 @@ public class ApiServer {
                     headers.put(headerParts[0], headerParts[1]);
                 }
             }
-            
             // Leer body si existe
-            StringBuilder body = new StringBuilder();
+            String body = null;
             if (headers.containsKey("Content-Length")) {
-                int contentLength = Integer.parseInt(headers.get("Content-Length"));
-                for (int i = 0; i < contentLength; i++) {
-                    body.append((char) in.read());
+                int len = Integer.parseInt(headers.get("Content-Length"));
+                byte[] buf = new byte[len];
+                for (int i = 0; i < len;) {
+	                byte[] bytes = Character.toString((char)in.read()).getBytes("utf-8");
+	                for (int j = 0; j < bytes.length; j++)
+		                buf[i + j] = bytes[j];
+		            i += bytes.length;
                 }
+                body = new String(buf, "utf-8");
             }
-            
             // Procesar la solicitud
-            String response = processRequest(method, path, body.toString());
+            String response = processRequest(method, path, body);
             
             // Enviar respuesta
             out.println("HTTP/1.1 200 OK");
@@ -88,6 +92,7 @@ public class ApiServer {
         }
     }
     private static String processRequest(String method, String path, String body) {
+	    System.out.println("HTTP [" + method + "] " + path + " = '" + body + "'");
         try {
             if (path.equals("/login") && method.equals("POST")) {
                 return dbConnection.login(body);
@@ -95,8 +100,9 @@ public class ApiServer {
                 return dbConnection.registerUser(body);
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
                 return dbConnection.syncUsersMobile();
-            } else if (path.equals("/receiverData") && method.equals("POST")) {
-                return dbConnection.receiverDataMobile(body);
+            } else if (path.equals("/recieverData") && method.equals("POST")) {
+	            System.out.println("Test");
+                return dbConnection.recieverDataMobile(body);
             } else if (path.equals("/exportCSV") && method.equals("GET")) {
                 return dbConnection.exportArchiveCSV();
             } else {

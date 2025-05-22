@@ -8,13 +8,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.util.Iterator;
 
 public class dbConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "241001";
     private static final String HOST = "localhost";
     private static final String DATABASE = "test";
-    private static final String PORT = "3006";
+    private static final String PORT = "3306";
     
     private static final String URL = "jdbc:mysql://"+HOST+":"+PORT+"/"+DATABASE;
     
@@ -67,7 +68,8 @@ public class dbConnection {
     }
     
     public static String registerUser(String json){
-        String[] jsonData = jsonString(json);
+	    JSONObject jsonObject = new JSONObject(json);
+        String[] jsonData = jsonString(jsonObject);
         int userId = 0;
         //Creacion de la conexion
         con = conectar();
@@ -119,23 +121,36 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String receiverDataMobile(String json){
-        String[] jsonData = jsonString(json);
+    public static String recieverDataMobile(String body){
+	    JSONArray list = new JSONArray(body);
         JSONObject response = new JSONObject();
-        con = conectar();
-        try{
-            PreparedStatement psmt= con.prepareStatement("INSERT INTO formulario (?) VALUES(?)");
-            psmt.setString(1, jsonData[0]);
-            psmt.setString(2, jsonData[1]);
-            psmt.executeUpdate();
-
-            con.close();
-            
-            response.put("success",true);
+	    System.out.println("[recieverData] Got " + list.length() + " rows.");
+        try {
+	        con = conectar();
+		    for (int i = 0; i < list.length(); i++) {
+			    JSONObject row = list.getJSONObject(i);
+		        String[] jsonData = jsonString(row);
+		        String sql = "INSERT INTO formulario (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
+		        System.out.println("[recieverData] Execute SQL: '" + sql + "'");
+	            PreparedStatement psmt = con.prepareStatement(sql);
+	            int j = 1;
+	            Iterator<String> keys = row.keys();
+	            while(keys.hasNext()) {
+		            String key = keys.next();
+		            Object obj = row.get(key);
+		            if (obj instanceof Integer)
+			            psmt.setInt(j, (Integer)obj);
+		            if (obj instanceof String)
+			            psmt.setString(j, (String)obj);
+			        j++;
+	            }
+	            psmt.executeUpdate();
+		    }
+	        con.close();
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
-        
+	    response.put("success",true);
         return response.toString();
     }
     
@@ -199,17 +214,21 @@ public class dbConnection {
         return -1;
     }
     
-    private static String[] jsonString(String json){
-        JSONObject dataUser = new JSONObject(json);
-        
-        //Extracion de las claves y los valores a String
+    private static String[] jsonString(JSONObject json){
+        // Extracion de las claves y los parametros de argumento a Strings
         StringBuilder keysObject = new StringBuilder();
         StringBuilder valueObject = new StringBuilder();
-        dataUser.keys().forEachRemaining(key -> { keysObject.append(key).append(","); valueObject.append(dataUser.get(key)).append(",");});
-        
-        String keys = keysObject.toString().trim().substring(0,keysObject.length()-1);
-        String value = valueObject.toString().trim().substring(0, valueObject.length()-1);
-        String[] result = {keys,value};
+        Iterator<String> keys = json.keys();
+        while(keys.hasNext()) {
+	        String key = keys.next();
+	        keysObject.append(key);
+	        valueObject.append("?");
+	        if (keys.hasNext()) {
+		       keysObject.append(", ");
+		       valueObject.append(", ");
+	        }
+	    }
+        String[] result = {keysObject.toString(),valueObject.toString()};
         return result;
     }
 }
