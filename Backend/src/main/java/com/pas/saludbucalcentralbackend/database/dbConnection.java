@@ -48,7 +48,7 @@ public class dbConnection {
         
         
         try {
-            PreparedStatement psmt = con.prepareStatement("SELECT name FROM usuarios WHERE cedula=? AND password=?");
+            PreparedStatement psmt = con.prepareStatement("SELECT nombre FROM usuarios WHERE cedula=? AND password=?");
             psmt.setLong(1,Long.parseLong(cedula));
             psmt.setString(2, password);
             ResultSet rs =psmt.executeQuery();
@@ -68,7 +68,7 @@ public class dbConnection {
     }
     
     public static String registerUser(String json){
-	    JSONObject jsonObject = new JSONObject(json);
+        JSONObject jsonObject = new JSONObject(json);
         String[] jsonData = jsonString(jsonObject);
         int userId = 0;
         //Creacion de la conexion
@@ -101,14 +101,41 @@ public class dbConnection {
         
         try{
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT cedula,name,password,type FROM usuario WHERE state=1");
+            ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,password,tipo FROM usuarios WHERE estado=1");
 
             while (rs.next()) {
                 JSONObject data = new JSONObject();
                 data.put("cedula", rs.getInt("cedula"));
-                data.put("name", rs.getString("name"));
+                data.put("nombre", rs.getString("nombre"));
                 data.put("password", rs.getString("password"));
-                data.put("type", rs.getString("type"));
+                data.put("tipo", rs.getString("tipo"));
+                dataArray.put(data);
+            }
+            response.put("success",true);
+            response.put("dataUsers",dataArray);
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        
+                
+        return response.toString();
+    }
+    
+    public static String users(){
+        con = conectar();
+        JSONArray dataArray = new JSONArray();
+        JSONObject response = new JSONObject();
+        
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,tipo,estado FROM usuarios");
+
+            while (rs.next()) {
+                JSONObject data = new JSONObject();
+                data.put("cedula", rs.getInt("cedula"));
+                data.put("nombre", rs.getString("nombre"));
+                data.put("estado", rs.getString("estado"));
+                data.put("tipo", rs.getString("tipo"));
                 dataArray.put(data);
             }
             response.put("success",true);

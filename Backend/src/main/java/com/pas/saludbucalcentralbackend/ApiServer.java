@@ -100,7 +100,9 @@ public class ApiServer {
                 return dbConnection.registerUser(body);
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
                 return dbConnection.syncUsersMobile();
-            } else if (path.equals("/recieverData") && method.equals("POST")) {
+            } else if (path.equals("/users") && method.equals("GET")) {
+                return dbConnection.users();
+            }else if (path.equals("/recieverData") && method.equals("POST")) {
 	            System.out.println("Test");
                 return dbConnection.recieverDataMobile(body);
             } else if (path.equals("/exportCSV") && method.equals("GET")) {
