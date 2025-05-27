@@ -11,8 +11,8 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 public class dbConnection {
-    private static final String USER = "root";
-    private static final String PASSWORD = "241001";
+    private static final String USER = "user";
+    private static final String PASSWORD = "pass";
     private static final String HOST = "localhost";
     private static final String DATABASE = "test";
     private static final String PORT = "3306";
@@ -48,7 +48,7 @@ public class dbConnection {
         
         
         try {
-            PreparedStatement psmt = con.prepareStatement("SELECT name FROM usuarios WHERE cedula=? AND password=?");
+            PreparedStatement psmt = con.prepareStatement("SELECT nombre FROM usuarios WHERE cedula=? AND password=?");
             psmt.setLong(1,Long.parseLong(cedula));
             psmt.setString(2, password);
             ResultSet rs =psmt.executeQuery();
@@ -101,14 +101,14 @@ public class dbConnection {
         
         try{
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT cedula,name,password,type FROM usuario WHERE state=1");
+            ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,password,tipo FROM usuarios WHERE estado = 'Activo'");
 
             while (rs.next()) {
                 JSONObject data = new JSONObject();
                 data.put("cedula", rs.getInt("cedula"));
-                data.put("name", rs.getString("name"));
+                data.put("nombre", rs.getString("nombre"));
                 data.put("password", rs.getString("password"));
-                data.put("type", rs.getString("type"));
+                data.put("tipo", rs.getString("tipo"));
                 dataArray.put(data);
             }
             response.put("success",true);
@@ -130,7 +130,7 @@ public class dbConnection {
 		    for (int i = 0; i < list.length(); i++) {
 			    JSONObject row = list.getJSONObject(i);
 		        String[] jsonData = jsonString(row);
-		        String sql = "INSERT INTO formulario (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
+		        String sql = "INSERT INTO formularios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
 		        System.out.println("[recieverData] Execute SQL: '" + sql + "'");
 	            PreparedStatement psmt = con.prepareStatement(sql);
 	            int j = 1;
@@ -159,7 +159,7 @@ public class dbConnection {
         JSONObject response = new JSONObject();
         try {
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM formulario");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM formularios");
             
         
         // Obtener todos los datos para exportar
