@@ -103,6 +103,7 @@ public class dbConnection {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,password,tipo FROM usuarios WHERE estado = 'Activo'");
 
+
             while (rs.next()) {
                 JSONObject data = new JSONObject();
                 data.put("cedula", rs.getInt("cedula"));
