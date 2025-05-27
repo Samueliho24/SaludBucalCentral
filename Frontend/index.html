@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="optionport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador - Sistema Móvil</title>
+    <link type="text/css" rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Panel de Administración - Sistema de evaluacion bucal</h1>
+        </div>
+    </header>
+    
+    <div class="menu">
+        <div class="option-menu active" data-option="welcome">Inicio</div>
+        <div class="option-menu" data-option="users">Usuarios</div>
+        <div class="option-menu" data-option="register">Registrar Usuario</div>
+        <div class="option-menu" data-option="export">Exportar Datos</div>
+        <div class="option-menu option-menu-last" data-option="logout">Salir</div>
+    </div>
+    
+    <div class="container">
+
+        <div id="status-message" class="status"></div>
+
+        <!-- Mensaje de bienvenida -->
+        <div id="welcome" class=" section option-content active">
+            <h2>Bienvenido al Panel de Administración</h2>
+            <p>Desde aquí puedes gestionar los usuarios y extraerlos datos almacenados en la base de datos.</p>
+        </div>
+        
+        <!-- Registro de usuario -->
+        <div id="register" class="section option-content">
+            <h2>Registrar Nuevo Usuario</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="name">Nombres y Apellidos</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="cedula">Cedula</label>
+                    <input type="number" id="cedula" name="cedula" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password-confirm">Confimar Contraseña</label>
+                    <input type="password" id="password-confirm" name="password-confirm" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Rol</label>
+                    <select id="role" name="role" required>
+                        <option value="Examinador">Examinador</option>
+                        <option value="Administrador">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit">Registrar Usuario</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Sección de Usuarios -->
+        <div id="users" class="section option-content">
+            <h2>Usuarios Registrados</h2>
+            <button id="refresh-users">Actualizar Lista</button>
+            <div id="users-table-container">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Cedula</th>
+                            <th>Nombres y Apellidos</th>
+                            <th>Estado</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Sección de Exportación -->
+        <div id="export" class="section option-content">
+            <h2>Exportar Datos a CSV</h2>
+            <p>Exporta todos los usuarios registrados a un archivo CSV.</p>
+            <button id="export-button">Exportar a CSV</button>
+            <div id="export-result" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
