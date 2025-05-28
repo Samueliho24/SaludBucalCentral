@@ -1,20 +1,22 @@
 package com.pas.saludbucalcentralbackend.database;
 
+import static com.pas.saludbucalcentralbackend.ApiServer.sha1;
 import java.io.*;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.Iterator;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
 
 public class dbConnection {
-    private static final String USER = "user";
-    private static final String PASSWORD = "pass";
+    private static final String USER = "root";
+    private static final String PASSWORD = "";
     private static final String HOST = "localhost";
-    private static final String DATABASE = "test";
+    private static final String DATABASE = "pas_central";
     private static final String PORT = "3306";
     
     private static final String URL = "jdbc:mysql://"+HOST+":"+PORT+"/"+DATABASE;
@@ -43,7 +45,7 @@ public class dbConnection {
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
         String cedula = String.valueOf(new StringBuilder(dataUser.getString("cedula")));
-        String password = String.valueOf(new StringBuilder(dataUser.getString("password")));
+        String password = sha1(String.valueOf(new StringBuilder(dataUser.getString("password"))));
         JSONObject response = new JSONObject();
         
         
@@ -140,12 +142,11 @@ public class dbConnection {
                 dataArray.put(data);
             }
             response.put("success",true);
-            response.put("dataUsers",dataArray);
+            response.put("data",dataArray);
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
         
-                
         return response.toString();
     }
     
@@ -189,35 +190,53 @@ public class dbConnection {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM formularios");
             
-        
-        // Obtener todos los datos para exportar
-        
-        
-        // Crear archivo CSV temporal
-        File csvFile = File.createTempFile("export-", ".csv");
-        try (PrintWriter writer = new PrintWriter(csvFile)) {
-            // Escribir encabezados
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-            
-            for (int i = 1; i <= columnCount; i++) {
-                writer.print(metaData.getColumnName(i));
-                if (i < columnCount) writer.print(",");
+            ////////////////////////////////////////
+            // Obtener todos los datos para exportar
+            JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
+            fileChooser.setDialogTitle("Guardar archivo de texto");
+            fileChooser.setSelectedFile(new File("Datos_de_formulario.csv"));
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            int userSelection = fileChooser.showSaveDialog(null);
+
+            if (userSelection != JFileChooser.APPROVE_OPTION) {
+                System.out.println("Operación cancelada por el usuario");
+                return response.toString();
             }
-            writer.println();
-            
-            // Escribir datos
-            while (rs.next()) {
+
+            File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".csv")) {
+                filePath += ".csv";
+                fileToSave = new File(filePath);
+            }
+            // Crear archivo CSV temporal
+            File csvFile = new File("Datos_de_formulario.csv");
+            //File csvFile = File.createTempFile("export-", ".csv");
+            try (PrintWriter writer = new PrintWriter(fileToSave)) {
+                // Escribir encabezados
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
                 for (int i = 1; i <= columnCount; i++) {
-                    writer.print(rs.getString(i));
+                    writer.print(metaData.getColumnName(i));
                     if (i < columnCount) writer.print(",");
                 }
                 writer.println();
+
+                // Escribir datos
+                while (rs.next()) {
+                    for (int i = 1; i <= columnCount; i++) {
+                        writer.print(rs.getString(i));
+                        if (i < columnCount) writer.print(",");
+                    }
+                    writer.println();
+                }
             }
-        }
         
         // Leer archivo CSV como texto
-        String csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
+        //String csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
+        
         response.put("success",true);
         // Registrar en el historial
         } catch (Exception e) {

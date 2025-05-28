@@ -11,8 +11,8 @@ public class Main {
             //xamppStart = Runtime.getRuntime().exec("C:\\xampp\\xampp-control.exe");
             
             //Inicio del servidor
-            ApiServer.httpServer();
             System.out.println("Servidor Activo");
+            ApiServer.httpServer();
         } catch (Exception e) {
             // JOptionPane.showMessageDialog(null, "Error al iniciar XAMPP: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;

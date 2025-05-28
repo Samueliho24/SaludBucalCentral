@@ -8,14 +8,14 @@ function showStatus(message, type) {
     statusElement.textContent = message;
     statusElement.className = 'status ' + type;
     
-    // Ocultar el mensaje después de 1 segundos
+    // Ocultar el mensaje después de 5 segundos
     setTimeout(() => {
         statusElement.className = 'status';
         statusElement.textContent = '';
-    }, 1000);
+    }, 5000);
 }
 
-async function loginData(cedula, password) {
+async function loginUser(cedula, password) {
     const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
@@ -62,19 +62,19 @@ async function registerUserData(name, cedula,password, role) {
 
 async function loadUsers() {
     try {
-        // En una implementación real, aquí llamarías a tu endpoint para obtener usuarios
-        // Para este ejemplo, usaremos datos simulados
-        const response = await fetch(`${API_BASE_URL}/use`);
+        const response = await fetch(`${API_BASE_URL}/users`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await response.json();
-        
         if (!response.ok || data.error) {
             throw new Error(data.error || 'Error al cargar usuarios');
         }
-        
         // Limpiar tabla
         const tbody = document.querySelector('#users-table tbody');
         tbody.innerHTML = '';
-        
         // Agregar usuarios a la tabla
         if (data.data && data.data.length > 0) {
             data.data.forEach(user => {
@@ -84,6 +84,7 @@ async function loadUsers() {
                     <td>${user.nombre || 'N/A'}</td>
                     <td>${user.estado || 'N/A'}</td>
                     <td>${user.tipo || 'N/A'}</td>
+                    <td>${'' || 'N/A'}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -93,7 +94,7 @@ async function loadUsers() {
             tbody.appendChild(tr);
         }
         
-        showStatus('Usuarios cargados exitosamente', 'success');
+        //showStatus('Usuarios cargados exitosamente', 'success');
     } catch (error) {
         showStatus('Error al cargar usuarios: ' + error.message, 'error');
     }
@@ -103,25 +104,15 @@ async function loadUsers() {
 
 async function exportToCsv() {
     try {
-        const response = await fetch(`${API_BASE_URL}/exportCSV`);
+        const response = await fetch(`${API_BASE_URL}/exportCSV`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await response.json();
-        /*
-        if (!response.ok || data.error) {
-            throw new Error(data.error || 'Error al exportar datos');
-        }
-        
-        // Crear y descargar el archivo CSV
-        const blob = new Blob([data.csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'DatosRecolectados.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        showStatus('Datos exportados exitosamente', 'success');*/
+        console.log(response);
+        showStatus('Datos exportados exitosamente.' , 'success');
     } catch (error) {
         showStatus('Error al exportar datos: ' + error.message, 'error');
     }
@@ -143,39 +134,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentOption = this.dataset.option;
                 this.classList.add('active');
                 document.getElementById(currentOption).classList.add('active');
+                
+                // Cargar usuarios inicialmente si es necesario
+                if (currentOption === 'users') {
+                    loadUsers();
+                }
             }
         });
     });
-
+    
     // Manejar formulario de inicio de sesión
-    document.getElementById('login-form').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const cedula = document.getElementById('cedula').value;
-        const password = document.getElementById('password').value;
-        
-        try {
-            //const response = await loginUser(cedula, password);
-            if (cedula === '1' && password === '1') {
-                showStatus('Sesión iniciada exitosamente.', 'success');
+    if(window.location.pathname.split("/").pop() === "login.html") {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const cedula = document.getElementById('cedula').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await loginUser(cedula, password);
+                console.log(response);
+                // Redirigir a la página principal
                 window.location.href = 'index.html';
+                // Limpiar formulario de inicio de sesión
+                document.getElementById('login-form').reset();
+                // Actualizar la pestaña actual
+                currentOption = 'welcome';
+                document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.add('active');
+                document.getElementById(currentOption).classList.add('active');
                 
-            } else {
-                showStatus('Datos incorrectos.', 'error');
+            } catch (error) {
             }
-             // Redirigir a la página principal
-            
-            // Limpiar formulario de inicio de sesión
-            document.getElementById('login-form').reset();
-            // Actualizar la pestaña actual
-            currentOption = 'welcome';
-            document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.add('active');
-            document.getElementById(currentOption).classList.add('active');
-            
-        } catch (error) {
-            showStatus('Error al iniciar sesión: ' + error.message, 'error');
-        }
-    });
+        });
+    }
     
     // Manejar formulario de registro
     document.getElementById('register-form').addEventListener('submit', async function(e) {
@@ -208,13 +199,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar botón de actualizar usuarios
     document.getElementById('refresh-users').addEventListener('click', loadUsers);
     
-
-    
     // Manejar botón de exportación
     document.getElementById('export-button').addEventListener('click', exportToCsv);
     
-    // Cargar usuarios inicialmente si es necesario
-    if (currentOption === 'users') {
-        loadUsers();
-    }
+    
 });

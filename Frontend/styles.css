@@ -150,6 +150,10 @@ tr:hover {
     gap: 15px;
 }
 
+#users-table {
+    width: 100%;
+}
+
 .form-group {
     margin-bottom: 15px;
 }
@@ -171,4 +175,9 @@ tr:hover {
     form {
         grid-template-columns: 1fr;
     }
+}
+
+
+#refresh-users{
+    display: none;
 }
