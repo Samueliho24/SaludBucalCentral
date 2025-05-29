@@ -103,7 +103,7 @@ async function loadUsers() {
 
 
 async function exportToCsv() {
-    try {
+    /*try {
         const response = await fetch(`${API_BASE_URL}/exportCSV`,{
             method: 'GET',
             headers: {
@@ -113,6 +113,34 @@ async function exportToCsv() {
         const data = await response.json();
         console.log(response);
         showStatus('Datos exportados exitosamente.' , 'success');
+    } catch (error) {
+        showStatus('Error al exportar datos: ' + error.message, 'error');
+    }*/
+    try {
+        const response = await fetch(`${API_BASE_URL}/exportCSV`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al exportar datos');
+        }
+        
+        // Crear y descargar el archivo CSV
+        const blob = new Blob([data.data], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Datos_de_formularios.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showStatus('Datos exportados exitosamente', 'success');
     } catch (error) {
         showStatus('Error al exportar datos: ' + error.message, 'error');
     }

@@ -185,43 +185,27 @@ public class dbConnection {
     
     public static String exportArchiveCSV(){
         con = conectar();
+        JSONArray dataArray = new JSONArray();
         JSONObject response = new JSONObject();
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM formularios");
             
-            ////////////////////////////////////////
-            // Obtener todos los datos para exportar
-            JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getDefaultDirectory());
-            fileChooser.setDialogTitle("Guardar archivo de texto");
-            fileChooser.setSelectedFile(new File("Datos_de_formulario.csv"));
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-            int userSelection = fileChooser.showSaveDialog(null);
-
-            if (userSelection != JFileChooser.APPROVE_OPTION) {
-                System.out.println("Operación cancelada por el usuario");
-                return response.toString();
-            }
-
-            File fileToSave = fileChooser.getSelectedFile();
-            String filePath = fileToSave.getAbsolutePath();
-            if (!filePath.toLowerCase().endsWith(".csv")) {
-                filePath += ".csv";
-                fileToSave = new File(filePath);
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            
+            for (int i = 1; i <= columnCount; i++) {
+                writer.print(metaData.getColumnName(i));
+                if (i < columnCount) writer.print(",");
             }
             // Crear archivo CSV temporal
             File csvFile = new File("Datos_de_formulario.csv");
             //File csvFile = File.createTempFile("export-", ".csv");
             try (PrintWriter writer = new PrintWriter(fileToSave)) {
                 // Escribir encabezados
-                ResultSetMetaData metaData = rs.getMetaData();
-                int columnCount = metaData.getColumnCount();
+                
 
-                for (int i = 1; i <= columnCount; i++) {
-                    writer.print(metaData.getColumnName(i));
-                    if (i < columnCount) writer.print(",");
-                }
+                
                 writer.println();
 
                 // Escribir datos
@@ -238,6 +222,7 @@ public class dbConnection {
         //String csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
         
         response.put("success",true);
+        response.put("data",dataArray);
         // Registrar en el historial
         } catch (Exception e) {
             
