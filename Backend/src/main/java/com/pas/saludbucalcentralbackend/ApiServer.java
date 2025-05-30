@@ -71,17 +71,17 @@ public class ApiServer {
                 body = new String(buf, "utf-8");
             }
             // Procesar la solicitud
-            String response = processRequest(method, path, body);
+            String[] response = processRequest(method, path, body);
             
             // Enviar respuesta
             out.println("HTTP/1.1 200 OK");
-            out.println("Content-Type: application/json");
+            out.println("Content-Type: " + response[0]);
             out.println("Access-Control-Allow-Origin: *"); // Permite cualquier origen
-            out.println("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+            out.println("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");
             out.println("Access-Control-Allow-Headers: Content-Type");
             out.println("Connection: close");
             out.println();
-            out.println(response);
+            out.println(response[1]);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,27 +93,30 @@ public class ApiServer {
             }
         }
     }
-    private static String processRequest(String method, String path, String body) {
-	    System.out.println("HTTP [" + method + "] " + path + " = '" + body + "'");
+    private static String[] processRequest(String method, String path, String body) {
+        System.out.println("HTTP [" + method + "] " + path + " = '" + body + "'");
+        String jsonType = "application/json";
+        String csv = "text/csv";
         try {
             if (path.equals("/login") && method.equals("POST")) {
-                return dbConnection.login(body);
+                return new String[]{jsonType,dbConnection.login(body)};
             } else if (path.equals("/register") && method.equals("POST")) {
-                return dbConnection.registerUser(body);
+                return new String[]{jsonType,dbConnection.registerUser(body)};
+            } else if (path.equals("/deleteUser") && method.equals("DELETE")) {
+                return new String[]{jsonType,dbConnection.registerUser(body)};
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
-                return dbConnection.syncUsersMobile();
+                return new String[]{jsonType,dbConnection.syncUsersMobile()};
             } else if (path.equals("/users") && method.equals("GET")) {
-                return dbConnection.users();
+                return new String[]{jsonType,dbConnection.users()};
             }else if (path.equals("/recieverData") && method.equals("POST")) {
-	            System.out.println("Test");
-                return dbConnection.recieverDataMobile(body);
+                return new String[]{jsonType,dbConnection.recieverDataMobile(body)};
             } else if (path.equals("/exportCSV") && method.equals("GET")) {
-                return dbConnection.exportArchiveCSV();
+                return new String[]{csv,dbConnection.exportArchiveCSV()};
             } else {
-                return new JSONObject().put("error", "Ruta no encontrada").toString();
+                return new String[]{jsonType,new JSONObject().put("error", "Ruta no encontrada").toString()};
             }
         } catch (Exception e) {
-            return new JSONObject().put("error", e.getMessage()).toString();
+            return new String[]{jsonType,new JSONObject().put("error", e.getMessage()).toString()};
         }
     }
     

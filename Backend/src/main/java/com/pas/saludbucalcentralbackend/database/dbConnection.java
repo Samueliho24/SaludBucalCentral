@@ -4,6 +4,7 @@ import static com.pas.saludbucalcentralbackend.ApiServer.sha1;
 import java.io.*;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
@@ -73,27 +74,55 @@ public class dbConnection {
         JSONObject jsonObject = new JSONObject(json);
         String[] jsonData = jsonString(jsonObject);
         int userId = 0;
+        JSONObject response = new JSONObject();
+        
         //Creacion de la conexion
         con = conectar();
         try {
-            PreparedStatement psmt= con.prepareStatement("INSERT INTO usuarios (?) VALUES(?)",Statement.RETURN_GENERATED_KEYS);
-            psmt.setString(1, jsonData[0]);
-            psmt.setString(2, jsonData[1]);
+            System.out.println("[register Data User]");
+            PreparedStatement psmt= con.prepareStatement("INSERT INTO usuarios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")",Statement.RETURN_GENERATED_KEYS);
+            int j = 1;
+            Iterator<String> keys = jsonObject.keys();
+            while(keys.hasNext()) {
+                String key = keys.next();
+                Object obj = jsonObject.get(key);
+                String objString = (String) obj;
+                
+                if(key.equals("cedula")){
+                    Integer objInteger = Integer.parseInt(objString);
+                    if(cedulaConsult(objInteger)){
+                        response.put("error","El usuario con la cedula ingresada ya existe. Por favor verificar los datos");
+                        con.close();
+                        return response.toString();
+                    }
+                }
+                
+                if(key.equals("password")){
+                    objString = sha1(objString);
+                }
+                
+                if (obj instanceof Integer)
+                    psmt.setInt(j, (Integer)obj);
+                if (obj instanceof String){
+                    psmt.setString(j, objString);
+                }
+                j++;
+            }
             psmt.executeUpdate();
 
             userId = getLastInsertId(psmt);
 
             con.close();
-        } catch (SQLException ex) {
+            
+            response.put("success",true);
+            response.put("userId", userId);
+        
+        
+        } catch (Exception ex) {
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
-        JSONObject response = new JSONObject();
-        response.put("success",true);
-        response.put("userId", userId);
-        
         return response.toString();
+        
     }
     
     public static String syncUsersMobile(){
@@ -150,32 +179,54 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String recieverDataMobile(String body){
-	    JSONArray list = new JSONArray(body);
+    public static String deleteUser(String json){
+        System.out.println(json);
+        con = conectar();
+        JSONObject dataUser = new JSONObject(json);
+        String cedula = String.valueOf(new StringBuilder(dataUser.getString("cedula")));
         JSONObject response = new JSONObject();
-	    System.out.println("[recieverData] Got " + list.length() + " rows.");
+        
         try {
-	        con = conectar();
-		    for (int i = 0; i < list.length(); i++) {
-			    JSONObject row = list.getJSONObject(i);
-		        String[] jsonData = jsonString(row);
-		        String sql = "INSERT INTO formularios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
-		        System.out.println("[recieverData] Execute SQL: '" + sql + "'");
-	            PreparedStatement psmt = con.prepareStatement(sql);
-	            int j = 1;
-	            Iterator<String> keys = row.keys();
-	            while(keys.hasNext()) {
-		            String key = keys.next();
-		            Object obj = row.get(key);
-		            if (obj instanceof Integer)
-			            psmt.setInt(j, (Integer)obj);
-		            if (obj instanceof String)
-			            psmt.setString(j, (String)obj);
-			        j++;
-	            }
-	            psmt.executeUpdate();
-		    }
-	        con.close();
+            PreparedStatement psmt = con.prepareStatement("UPDATE usuarios SET estado='Inactivo' WHERE cedula=?");
+            psmt.setInt(1, Integer.parseInt(cedula));
+            ResultSet rs = psmt.executeQuery();
+            if(rs.next()){
+                response.put("success",true);
+            }
+                      
+        } catch (Exception e) {
+        }
+        
+        return response.toString();
+    }
+    
+    public static String recieverDataMobile(String body){
+        JSONArray list = new JSONArray(body);
+        JSONObject response = new JSONObject();
+        System.out.println("[recieverData] Got " + list.length() + " rows.");
+        
+        try {
+            con = conectar();
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject row = list.getJSONObject(i);
+                String[] jsonData = jsonString(row);
+                String sql = "INSERT INTO formularios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
+                System.out.println("[recieverData] Execute SQL: '" + sql + "'");
+                PreparedStatement psmt = con.prepareStatement(sql);
+                int j = 1;
+                Iterator<String> keys = row.keys();
+                while(keys.hasNext()) {
+                        String key = keys.next();
+                        Object obj = row.get(key);
+                        if (obj instanceof Integer)
+                            psmt.setInt(j, (Integer)obj);
+                        if (obj instanceof String)
+                            psmt.setString(j, (String)obj);
+                        j++;
+                }
+                psmt.executeUpdate();
+            }
+            con.close();
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
@@ -185,27 +236,22 @@ public class dbConnection {
     
     public static String exportArchiveCSV(){
         con = conectar();
-        JSONArray dataArray = new JSONArray();
+        
         JSONObject response = new JSONObject();
+        String csvContent;
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM formularios");
-            
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
-            
-            for (int i = 1; i <= columnCount; i++) {
-                writer.print(metaData.getColumnName(i));
-                if (i < columnCount) writer.print(",");
-            }
-            // Crear archivo CSV temporal
-            File csvFile = new File("Datos_de_formulario.csv");
-            //File csvFile = File.createTempFile("export-", ".csv");
-            try (PrintWriter writer = new PrintWriter(fileToSave)) {
+            File csvFile = File.createTempFile("export-", ".csv");
+            try (PrintWriter writer = new PrintWriter(csvFile)) {
                 // Escribir encabezados
-                
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
 
-                
+                for (int i = 1; i <= columnCount; i++) {
+                    writer.print(metaData.getColumnName(i));
+                    if (i < columnCount) writer.print(",");
+                }
                 writer.println();
 
                 // Escribir datos
@@ -217,19 +263,14 @@ public class dbConnection {
                     writer.println();
                 }
             }
-        
-        // Leer archivo CSV como texto
-        //String csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
-        
-        response.put("success",true);
-        response.put("data",dataArray);
-        // Registrar en el historial
+            csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
+            response.put("success", true);
+            response.put("data", csvContent);
+
+            // Eliminar archivo temporal
+            csvFile.delete();
         } catch (Exception e) {
-            
         }
-        
-        
-        
         return response.toString();
     }
     
@@ -262,5 +303,19 @@ public class dbConnection {
 	    }
         String[] result = {keysObject.toString(),valueObject.toString()};
         return result;
+    }
+    
+    private static boolean cedulaConsult(int cedula){
+        con = conectar();
+        try {
+            PreparedStatement psmt = con.prepareStatement("SELECT cedula FROM usuarios WHERE cedula=?");
+            psmt.setInt(1, cedula);
+            ResultSet rs = psmt.executeQuery();
+            if(rs.next()){
+                return true;
+            }
+        } catch (Exception e) {
+        }
+        return false;
     }
 }

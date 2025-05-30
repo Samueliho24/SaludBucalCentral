@@ -2,6 +2,8 @@
 const API_BASE_URL = 'http://localhost:8080';
 let currentOption = 'welcome'; // Pestaña actual
 
+// Funciones para manejar el servidor
+
 // Función para mostrar mensajes de estado
 function showStatus(message, type) {
     const statusElement = document.getElementById('status-message');
@@ -36,29 +38,49 @@ async function loginUser(cedula, password) {
     return data;
 }
 // Funciones para interactuar con la API
-async function registerUserData(name, cedula,password, role) {
+async function registerUserData(nombre, cedula,password, tipo) {
     const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            name,
+            nombre,
             cedula,
             password,
-            role
+            tipo
+        })
+    });
+    
+    const data = await response.json();
+    console.log(data);
+    
+    if (!response.ok || data.error) {
+        throw new Error(data.error || 'El usuario con la cedula ' + cedula + ' ya existe');
+    }
+    
+    return data;
+}
+
+async function deleteUser(cedula) {
+    const response = await fetch(`${API_BASE_URL}/deleteUser`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            cedula
         })
     });
     
     const data = await response.json();
     
     if (!response.ok || data.error) {
-        throw new Error(data.error || 'Error en la solicitud');
+        throw new Error(data.error || 'Error al eliminar usuario');
     }
     
     return data;
 }
-
 
 async function loadUsers() {
     try {
@@ -84,7 +106,7 @@ async function loadUsers() {
                     <td>${user.nombre || 'N/A'}</td>
                     <td>${user.estado || 'N/A'}</td>
                     <td>${user.tipo || 'N/A'}</td>
-                    <td>${'' || 'N/A'}</td>
+                    <td><button class="delete-button" data-cedula="${user.cedula}" click="${deleteUser(user.cedula)}">Borrar</button></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -103,19 +125,6 @@ async function loadUsers() {
 
 
 async function exportToCsv() {
-    /*try {
-        const response = await fetch(`${API_BASE_URL}/exportCSV`,{
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const data = await response.json();
-        console.log(response);
-        showStatus('Datos exportados exitosamente.' , 'success');
-    } catch (error) {
-        showStatus('Error al exportar datos: ' + error.message, 'error');
-    }*/
     try {
         const response = await fetch(`${API_BASE_URL}/exportCSV`,{
             method: 'GET',
@@ -124,7 +133,6 @@ async function exportToCsv() {
             }
         });
         const data = await response.json();
-        
         if (!response.ok || data.error) {
             throw new Error(data.error || 'Error al exportar datos');
         }
@@ -145,6 +153,8 @@ async function exportToCsv() {
         showStatus('Error al exportar datos: ' + error.message, 'error');
     }
 }
+
+//Enlace con el HTML
 
 // Esperar a que el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
@@ -170,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    
     
     // Manejar formulario de inicio de sesión
     if(window.location.pathname.split("/").pop() === "login.html") {
@@ -200,18 +212,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('register-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const name = document.getElementById('name').value;
+        const nombre = document.getElementById('nombre').value;
         const cedula = document.getElementById('cedula').value;
         const password = document.getElementById('password').value;
         const passwordConfirm = document.getElementById('password-confirm').value;
-        const role = document.getElementById('role').value;
+        const tipo = document.getElementById('tipo').value;
         
         
         try {
             while (password !== passwordConfirm) {
                 throw new Error('Las contraseñas no coinciden');
             }
-            const response = await registerUser(name, cedula, password, passwordConfirm, role);
+            const response = await registerUserData(nombre, cedula, password, tipo);
             showStatus('Usuario registrado exitosamente.', 'success');
             document.getElementById('register-form').reset();
             
@@ -230,5 +242,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar botón de exportación
     document.getElementById('export-button').addEventListener('click', exportToCsv);
     
-    
+    //Borrar usuarios de la lista de usuarios
+    document.querySelectorAll('.delete-button').forEach(deleteButton => {
+        deleteButton.addEventListener('click', function() {
+            const cedula = this.dataset.cedula;
+            console.log(cedula);
+            try {
+                deleteUser(cedula);
+                showStatus('Usuario eliminado exitosamente', 'success');
+                loadUsers();
+            } catch (error) {
+                showStatus('Error al eliminar usuario: ' + error.message, 'error');
+            }
+        });
+    });
 });

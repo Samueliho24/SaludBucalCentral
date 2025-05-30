@@ -9,7 +9,7 @@
 <body>
     <header>
         <div class="container">
-            <h1>Panel de Administración - Sistema de evaluacion bucal</h1>
+            <h1>Sistema de recoleccion de datos de evaluacion bucal<br>Panel de Administración</h1>
         </div>
     </header>
     
@@ -18,7 +18,7 @@
         <div class="option-menu" data-option="users">Usuarios</div>
         <div class="option-menu" data-option="register">Registrar Usuario</div>
         <div class="option-menu" data-option="export">Exportar Datos</div>
-        <div class="option-menu option-menu-last" data-option="logout">Salir</div>
+        <div class="option-menu option-menu-last" data-option="logout">Cerrar Sesión</div>
     </div>
     
     <div class="container">
@@ -36,8 +36,8 @@
             <h2>Registrar Nuevo Usuario</h2>
             <form id="register-form">
                 <div class="form-group">
-                    <label for="name">Nombres y Apellidos</label>
-                    <input type="text" id="name" name="name" required>
+                    <label for="nombre">Nombres y Apellidos</label>
+                    <input type="text" id="nombre" name="nombre" required>
                 </div>
                 <div>
                     <label for="cedula">Cedula</label>
@@ -55,8 +55,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="role">Rol</label>
-                    <select id="role" name="role" required>
+                    <label for="tipo">Rol</label>
+                    <select id="tipo" name="tipo" required>
                         <option value="Examinador">Examinador</option>
                         <option value="Administrador">Administrador</option>
                     </select>
@@ -96,6 +96,7 @@
             <div id="export-result" style="margin-top: 20px;"></div>
         </div>
     </div>
+    
 
     <script src="app.js"></script>
 </body>
