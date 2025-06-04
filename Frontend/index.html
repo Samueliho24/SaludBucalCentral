@@ -54,14 +54,20 @@
                     <input type="password" id="password-confirm" name="password-confirm" required>
                 </div>
                 
-                <div class="form-group">
+                <div class="form-group" enabled="false">
                     <label for="tipo">Rol</label>
-                    <select id="tipo" name="tipo" required>
+                    <select id="tipo" name="tipo" >
                         <option value="Examinador">Examinador</option>
-                        <option value="Administrador">Administrador</option>
+                        <option value="Investigador">Investigador</option>
                     </select>
                 </div>
-                
+
+                <div class="form-group">
+                    <label id="investigador-label" for="investigador">Investigador</label>
+                    <select id="investigador" type="number" name="investigador" required>
+                    </select>
+                </div>    
+
                 <div class="form-group">
                     <button type="submit">Registrar Usuario</button>
                 </div>

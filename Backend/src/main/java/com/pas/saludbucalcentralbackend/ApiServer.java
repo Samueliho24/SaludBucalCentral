@@ -103,15 +103,16 @@ public class ApiServer {
             } else if (path.equals("/register") && method.equals("POST")) {
                 return new String[]{jsonType,dbConnection.registerUser(body)};
             } else if (path.equals("/deleteUser") && method.equals("DELETE")) {
-                return new String[]{jsonType,dbConnection.registerUser(body)};
+                System.out.println("Borrado DELETE");
+                return new String[]{jsonType,dbConnection.deleteUser(body)};
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
                 return new String[]{jsonType,dbConnection.syncUsersMobile()};
             } else if (path.equals("/users") && method.equals("GET")) {
                 return new String[]{jsonType,dbConnection.users()};
             }else if (path.equals("/recieverData") && method.equals("POST")) {
                 return new String[]{jsonType,dbConnection.recieverDataMobile(body)};
-            } else if (path.equals("/exportCSV") && method.equals("GET")) {
-                return new String[]{csv,dbConnection.exportArchiveCSV()};
+            } else if (path.equals("/exportCSV") && method.equals("POST")) {
+                return new String[]{csv,dbConnection.exportArchiveCSV(body)};
             } else {
                 return new String[]{jsonType,new JSONObject().put("error", "Ruta no encontrada").toString()};
             }

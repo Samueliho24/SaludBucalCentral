@@ -4,14 +4,11 @@ import static com.pas.saludbucalcentralbackend.ApiServer.sha1;
 import java.io.*;
 
 import java.sql.*;
-import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.Iterator;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileSystemView;
 
 public class dbConnection {
     private static final String USER = "root";
@@ -51,13 +48,15 @@ public class dbConnection {
         
         
         try {
-            PreparedStatement psmt = con.prepareStatement("SELECT nombre FROM usuarios WHERE cedula=? AND password=?");
+            PreparedStatement psmt = con.prepareStatement("SELECT nombre,cedula,tipo FROM usuarios WHERE cedula=? AND password=?");
             psmt.setLong(1,Long.parseLong(cedula));
             psmt.setString(2, password);
-            ResultSet rs =psmt.executeQuery();
-               
+            ResultSet rs = psmt.executeQuery();
             if(rs.next()){
                 response.put("success",true);
+                response.put("nombre",rs.getString(1));
+                response.put("cedula",rs.getInt(2));
+                response.put("tipo",rs.getString(3));
             } else{
                 response.put("failed",false);
             }
@@ -89,7 +88,7 @@ public class dbConnection {
                 String objString = (String) obj;
                 
                 if(key.equals("cedula")){
-                    Integer objInteger = Integer.parseInt(objString);
+                    Integer objInteger = Integer.valueOf(objString);
                     if(cedulaConsult(objInteger)){
                         response.put("error","El usuario con la cedula ingresada ya existe. Por favor verificar los datos");
                         con.close();
@@ -160,7 +159,7 @@ public class dbConnection {
         
         try{
             Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,tipo,estado FROM usuarios");
+            ResultSet rs = stmt.executeQuery("SELECT cedula,nombre,tipo,estado FROM usuarios WHERE estado!='Eliminado'");
 
             while (rs.next()) {
                 JSONObject data = new JSONObject();
@@ -180,21 +179,28 @@ public class dbConnection {
     }
     
     public static String deleteUser(String json){
-        System.out.println(json);
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
-        String cedula = String.valueOf(new StringBuilder(dataUser.getString("cedula")));
         JSONObject response = new JSONObject();
+        String query;
+        
+        if(dataUser.getString("accion").equals("Eliminar")){
+            query="'Eliminado'";
+        }else if(dataUser.getString("accion").equals("Desactivar")){
+            query="'Inactivo'";
+        }else{
+            query="'Activo'";
+        }
         
         try {
-            PreparedStatement psmt = con.prepareStatement("UPDATE usuarios SET estado='Inactivo' WHERE cedula=?");
-            psmt.setInt(1, Integer.parseInt(cedula));
-            ResultSet rs = psmt.executeQuery();
-            if(rs.next()){
+            PreparedStatement psmt = con.prepareStatement("UPDATE usuarios SET estado="+query+" WHERE cedula=?");
+            psmt.setInt(1, dataUser.getInt("cedula"));
+            int rs = psmt.executeUpdate();
+            if (rs>0){
                 response.put("success",true);
             }
-                      
         } catch (Exception e) {
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,e);
         }
         
         return response.toString();
@@ -234,14 +240,16 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String exportArchiveCSV(){
+    public static String exportArchiveCSV(String json){
         con = conectar();
-        
+        JSONObject dataUser = new JSONObject(json);
         JSONObject response = new JSONObject();
         String csvContent;
         try {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM formularios");
+            PreparedStatement psmt = con.prepareStatement("SELECT f.* FROM formularios f INNER JOIN usuarios u WHERE u.cedula=f.examinador_cedula AND (u.investigador=? OR u.cedula=?)");
+            psmt.setInt(1, dataUser.getInt("cedula"));
+            psmt.setInt(2, dataUser.getInt("cedula"));
+            ResultSet rs = psmt.executeQuery();
             File csvFile = File.createTempFile("export-", ".csv");
             try (PrintWriter writer = new PrintWriter(csvFile)) {
                 // Escribir encabezados
@@ -270,6 +278,7 @@ public class dbConnection {
             // Eliminar archivo temporal
             csvFile.delete();
         } catch (Exception e) {
+            response.put("error", e);
         }
         return response.toString();
     }
