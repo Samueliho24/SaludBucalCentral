@@ -17,6 +17,7 @@ function showStatus(message, type) {
     }, 5000);
 }
 
+// Función para iniciar sesión
 async function loginUser(cedula, password) {
     const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
@@ -34,11 +35,11 @@ async function loginUser(cedula, password) {
     if (!response.ok || data.error) {
         throw new Error(data.error || 'Error en la solicitud');
     }
-    
+    currentOption = 'welcome';
     return data;
 }
-// Funciones para interactuar con la API
-async function registerUserData(nombre, cedula,password, tipo, investigador) {
+// Funciones para registrar un nuevo usuario
+async function registerUserData(nombre, cedula,password, tipo) {
     const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
@@ -48,8 +49,7 @@ async function registerUserData(nombre, cedula,password, tipo, investigador) {
             nombre,
             cedula,
             password,
-            tipo,
-            investigador
+            tipo
         })
     });
     
@@ -62,7 +62,7 @@ async function registerUserData(nombre, cedula,password, tipo, investigador) {
     
     return data;
 }
-
+// Función para eliminar un usuario
 async function deleteUser(cedula,accion) {
     const response = await fetch(`${API_BASE_URL}/deleteUser`, {
         method: 'DELETE',
@@ -86,8 +86,60 @@ async function deleteUser(cedula,accion) {
     
     return data;
 }
+async function changePasswordUserData(cedula, password) {
+    const response = await fetch(`${API_BASE_URL}/changePassword`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            cedula,
+            password
+        })
+    });
+    console.log(response);
+    const data = await response.json();
+    
+    if (!response.ok || data.error) {
+        throw new Error(data.error || 'Error al cambiar la contrasena');
+    }
+    
+    return data;
+}
+//Funcion para cambiar la contrasena de un usuario
+function changePasswordUser(cedula) {
+    document.getElementById('change-password').classList.add('active');
+    document.getElementById('change-password-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('new-password').value;
+        console.log(password)
+        const passwordConfirm = document.getElementById('confirm-new-password').value;
+        
+        try {
+            while (password !== passwordConfirm) {
+                throw new Error('Las contraseñas no coinciden');
+            }
+            const response = await changePasswordUserData(cedula, password);
+            if(response.success){
+                showStatus('Contrasena cambiada exitosamente.', 'success');
+                document.getElementById('change-password-form').reset();
+                document.getElementById('change-password').classList.remove('active');
+            }
+        } catch (error) {
+            showStatus('Error al cambiar la contrasena: ' + error.message, 'error');
+        }
+    });
+    document.getElementById('cancel-change-password').addEventListener('click', function() {
+        document.getElementById('change-password').classList.remove('active');
+        document.getElementById('change-password-form').reset();
+    })
+    
+    }
 
-async function User(cedula) {
+// Función para llenar la tabla de usuarios
+async function fillTableUsers() {
+    let accionEstado='';
     try {
         const response = await fetch(`${API_BASE_URL}/users`,{
             method: 'GET',
@@ -99,55 +151,65 @@ async function User(cedula) {
         if (!response.ok || data.error) {
             throw new Error(data.error || 'Error al cargar usuarios');
         }
+        // Limpiar tabla
+        const tbody = document.querySelector('#users-table tbody');
+        tbody.innerHTML = '';
+
+        // Agregar usuarios a la tabla
+        if (data.data && data.data.length > 0) {
+            data.data.forEach(user => {
+                if(user.estado ==='Activo'){
+                    accionEstado = 'Desactivar';
+                }else{
+                    accionEstado = 'Activar';
+                }
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.cedula}</td>
+                    <td>${user.nombre || 'N/A'}</td>
+                    <td>${user.estado || 'N/A'}</td>
+                    <td>${user.tipo || 'N/A'}</td>
+                    <td><button class="table-button delete-button" data-cedula="${user.cedula}" onclick="changePasswordUser(${user.cedula})">Cambiar contraseña</button>
+                    <button class="table-button desactivate-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, '${accionEstado}')">${accionEstado}</button>
+                    <button class="table-button delete-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, 'Eliminar')">Borrar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="5" style="text-align: center;">No hay usuarios registrados</td>';
+            tbody.appendChild(tr);
+        }
+        //showStatus('Usuarios cargados exitosamente', 'success');
+    } catch (error) {
+        showStatus('Error al cargar usuarios: ' + error.message, 'error');
+    }
+    
+}
+
+//Funcion para obtener el numero de ip
+async function getIP() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/ipKey`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log(response);
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al obtener la IP');
+        }
+        
         return data;
+
     } catch (error) {
         showStatus('Error al cargar usuarios: ' + error.message, 'error');
     }
 }
 
-async function fillInvestigadores() {
-    const data = await User();
-    const datos = data.data;
-    const select = document.getElementById('investigador');
-    const optionsHTML = datos.filter(item => item.tipo === "Investigador").map(item => `<option value="${item.id}">${item.nombre}</option>`).join('');
-    select.innerHTML = optionsHTML;
-}
-async function fillTableUsers() {
-    let accionEstado='';
-    const data = await User();
-    // Limpiar tabla
-    const tbody = document.querySelector('#users-table tbody');
-    tbody.innerHTML = '';
-
-    // Agregar usuarios a la tabla
-    if (data.data && data.data.length > 0) {
-        data.data.forEach(user => {
-            if(user.estado ==='Activo'){
-                accionEstado = 'Desactivar';
-            }else{
-                accionEstado = 'Activar';
-            }
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${user.cedula}</td>
-                <td>${user.nombre || 'N/A'}</td>
-                <td>${user.estado || 'N/A'}</td>
-                <td>${user.tipo || 'N/A'}</td>
-                <td><button class="table-button desactivate-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, '${accionEstado}')">${accionEstado}</button>
-                <button class="table-button delete-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, 'Eliminar')">Borrar</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } else {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="5" style="text-align: center;">No hay usuarios registrados</td>';
-        tbody.appendChild(tr);
-    }
-    
-    //showStatus('Usuarios cargados exitosamente', 'success');
-    
-}
-
+// Función para exportar datos a un archivo CSV
 async function exportToCsv() {
     const userData = JSON.parse(sessionStorage.getItem('userAuth'));
     try {
@@ -190,11 +252,25 @@ async function exportToCsv() {
 document.addEventListener('DOMContentLoaded', function() {
     // Manejar cambios de pestaña
     document.querySelectorAll('.option-menu').forEach(optionMenu => {
-        optionMenu.addEventListener('click', function() {
+        optionMenu.addEventListener('click', async function() {
             // Mejorar la logica de cerrar sesión
+
             if (this.dataset.option ==="logout") {
-                window.location.href = 'login.html';
-                sessionStorage.removeItem('userAuth');
+                document.getElementById('logout-section').classList.add('active');
+                document.getElementById('logout-button').addEventListener('click', function() {
+                    window.location.href = 'login.html';
+                    sessionStorage.removeItem('userAuth');
+                });
+                document.getElementById('cancel-logout-button').addEventListener('click', function() {
+                    document.getElementById('logout-section').classList.remove('active');
+                });
+            }else if(this.dataset.option ==="code-sync"){
+                document.getElementById('code-sync').classList.add('active');
+                const data = await getIP();
+                document.getElementById('code-sync-message').innerHTML = data.key;
+                document.getElementById('cancel-code-sync-button').addEventListener('click', function() {
+                    document.getElementById('code-sync').classList.remove('active');
+                });
             }else {
                 document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.remove('active');
                 document.getElementById(currentOption).classList.remove('active');
@@ -208,15 +284,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (currentOption === 'users') {
                     fillTableUsers();
                 }
-                if (currentOption === 'register') {
-                    fillInvestigadores();
-                }
             }
         });
     });
 
-    
-    
     // Manejar formulario de inicio de sesión
     if(window.location.pathname.split("/").pop() === "login.html") {
         document.getElementById('login-form').addEventListener('submit', async function(e) {
@@ -249,16 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    document.getElementById('tipo').addEventListener('change', function() {
-        if (this.value === "Investigador") {
-            document.getElementById('investigador-label').style.display = 'none';
-            document.getElementById('investigador').style.display = 'none';
-            document.getElementById('investigador').value = null;
-        } else {
-            document.getElementById('investigador-label').style.display = 'block';
-            document.getElementById('investigador').style.display = 'block';
-        }
-    });
+    
     // Manejar formulario de registro
     document.getElementById('register-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -268,7 +330,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = document.getElementById('password').value;
         const passwordConfirm = document.getElementById('password-confirm').value;
         const tipo = document.getElementById('tipo').value;
-        const investigador = document.getElementById('investigador').value;
 
         
         
@@ -276,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
             while (password !== passwordConfirm) {
                 throw new Error('Las contraseñas no coinciden');
             }
-            const response = await registerUserData(nombre, cedula, password, tipo, investigador);
+            const response = await registerUserData(nombre, cedula, password, tipo);
             showStatus('Usuario registrado exitosamente.', 'success');
             if(response.failed === false) {
                 showStatus('El usuario con la cedula ' + cedula + ' ya existe', 'error');
@@ -297,5 +358,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manejar botón de exportación
     document.getElementById('export-button').addEventListener('click', exportToCsv);
+
+    document.getElementById('cancel-change-password').addEventListener('click', function() {
+                    document.getElementById('change-password').classList.remove('active');
+                });
     
 });

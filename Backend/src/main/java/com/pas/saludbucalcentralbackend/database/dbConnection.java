@@ -17,7 +17,7 @@ public class dbConnection {
     private static final String DATABASE = "pas_central";
     private static final String PORT = "3306";
     
-    private static final String URL = "jdbc:mysql://"+HOST+":"+PORT+"/"+DATABASE;
+    private static final String URL = "jdbc:sqlite:Data.db";
     
     private static Connection con;
             
@@ -25,9 +25,9 @@ public class dbConnection {
         Connection conexion = null;
         
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName("org.sqlite.JDBC");
             
-            conexion = DriverManager.getConnection(URL, USER, PASSWORD);
+            conexion = DriverManager.getConnection(URL);
             System.out.println("Conexión exitosa a la base de datos");
             
         } catch (ClassNotFoundException e) {
@@ -60,11 +60,36 @@ public class dbConnection {
             } else{
                 response.put("failed",false);
             }
+            con.close();
         } catch (SQLException ex) {
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
+        
+        return response.toString();
+    }
+    
+    public static String changePassword(String json){
+        con = conectar();
+        JSONObject dataUser = new JSONObject(json);
+        JSONObject response = new JSONObject();
+        System.out.println(dataUser);
+        try {
+            PreparedStatement psmt = con.prepareStatement("UPDATE usuarios SET password=? WHERE cedula=?");
+            String contrasena=sha1(dataUser.getString("password"));
+            psmt.setString(1, contrasena);
+            psmt.setInt(1, dataUser.getInt("cedula"));
+            System.out.println(psmt);
+            int rs = psmt.executeUpdate();
+            if (rs>0){
+                response.put("success",true);
+            }
+            con.close();
+
+        } catch (Exception e) {
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,e);
+        }
         
         return response.toString();
     }
@@ -144,6 +169,7 @@ public class dbConnection {
             }
             response.put("success",true);
             response.put("dataUsers",dataArray);
+            con.close();
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
@@ -152,7 +178,7 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String users(){
+    public static String users() throws SQLException{
         con = conectar();
         JSONArray dataArray = new JSONArray();
         JSONObject response = new JSONObject();
@@ -171,10 +197,11 @@ public class dbConnection {
             }
             response.put("success",true);
             response.put("data",dataArray);
+            con.close();
+
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
         }
-        
         return response.toString();
     }
     
@@ -199,6 +226,8 @@ public class dbConnection {
             if (rs>0){
                 response.put("success",true);
             }
+            con.close();
+
         } catch (Exception e) {
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,e);
         }
@@ -246,9 +275,7 @@ public class dbConnection {
         JSONObject response = new JSONObject();
         String csvContent;
         try {
-            PreparedStatement psmt = con.prepareStatement("SELECT f.* FROM formularios f INNER JOIN usuarios u WHERE u.cedula=f.examinador_cedula AND (u.investigador=? OR u.cedula=?)");
-            psmt.setInt(1, dataUser.getInt("cedula"));
-            psmt.setInt(2, dataUser.getInt("cedula"));
+            PreparedStatement psmt = con.prepareStatement("SELECT * FROM formularios");
             ResultSet rs = psmt.executeQuery();
             File csvFile = File.createTempFile("export-", ".csv");
             try (PrintWriter writer = new PrintWriter(csvFile)) {
@@ -277,6 +304,7 @@ public class dbConnection {
 
             // Eliminar archivo temporal
             csvFile.delete();
+            con.close();
         } catch (Exception e) {
             response.put("error", e);
         }

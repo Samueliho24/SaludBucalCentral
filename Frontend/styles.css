@@ -111,7 +111,7 @@ tr:hover {
     
 }
 .option-menu {
-    width: 10vw;
+    width: 8vw;
     min-width: auto;
     display: flex;
     justify-content: center;
@@ -173,6 +173,36 @@ tr:hover {
 
 .option-content.active {
     display: block;
+}
+
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #111111bd;
+}
+    
+
+.modal-content {
+    background-color: white;
+    margin: auto;
+    width: 50%;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 3px;
+    text-align: center;
+    transform: translate(0,50%);
+}
+.modal-content button {
+    width: 140px;
+    margin: 20px auto;
+}
+
+.footer{
+    text-align: center;
 }
 
 @media (max-width: 768px) {
