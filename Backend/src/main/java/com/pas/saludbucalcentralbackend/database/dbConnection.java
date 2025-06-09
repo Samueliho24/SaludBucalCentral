@@ -315,6 +315,21 @@ public class dbConnection {
         return response.toString();
     }
     
+    public static String deleteDB(){
+        JSONObject response = new JSONObject();
+        con = conectar();
+        try{
+            Statement stmt = con.createStatement();
+            stmt.executeQuery("TRUNCATE TABLE formularios");
+            response.put("success",true);
+            con.close();
+
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        return response.toString();
+    }
+    
     private static int getLastInsertId(PreparedStatement stmt){
         ResultSet rs;
         try {

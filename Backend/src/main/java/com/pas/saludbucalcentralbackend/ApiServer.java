@@ -114,7 +114,10 @@ public class ApiServer {
             } else if (path.equals("/deleteUser") && method.equals("DELETE")) {
                 System.out.println("Borrado DELETE");
                 return new String[]{jsonType,dbConnection.deleteUser(body)};
-                
+                //Borrar Formularios
+            } else if (path.equals("/deleteDB") && method.equals("DELETE")) {
+                System.out.println("Borrado DELETE");
+                return new String[]{jsonType,dbConnection.deleteDB()};
             //Sincronizacion de usuarios
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
                 return new String[]{jsonType,dbConnection.syncUsersMobile()};

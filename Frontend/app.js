@@ -246,6 +246,24 @@ async function exportToCsv() {
     }
 }
 
+async function deleteDB() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/deleteDB`,{
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al obtener los formularios');
+        }
+        return data;
+    } catch (error) {
+        showStatus('Error al obtener los formularios: ' + error.message, 'error');
+    }
+}
+
 //Enlace con el HTML
 
 // Esperar a que el DOM esté cargado
@@ -358,6 +376,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manejar botón de exportación
     document.getElementById('export-button').addEventListener('click', exportToCsv);
+    
+    document.getElementById('clean-button').addEventListener('click', deleteDB);
 
     document.getElementById('cancel-change-password').addEventListener('click', function() {
                     document.getElementById('change-password').classList.remove('active');
