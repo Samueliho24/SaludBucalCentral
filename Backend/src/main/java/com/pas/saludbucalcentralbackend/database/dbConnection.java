@@ -39,11 +39,15 @@ public class dbConnection {
         return conexion;
     }
     
-    public static String login(String json){
+    public static String login(String json, boolean hash){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
+        System.out.println(json);
         String cedula = String.valueOf(new StringBuilder(dataUser.getString("cedula")));
-        String password = sha1(String.valueOf(new StringBuilder(dataUser.getString("password"))));
+        String password = String.valueOf(new StringBuilder(dataUser.getString("password")));
+        if(hash){
+               password = sha1(password);
+        }
         JSONObject response = new JSONObject();
         
         
@@ -58,7 +62,7 @@ public class dbConnection {
                 response.put("cedula",rs.getInt(2));
                 response.put("tipo",rs.getString(3));
             } else{
-                response.put("failed",false);
+                response.put("success",false);
             }
             con.close();
         } catch (SQLException ex) {

@@ -100,7 +100,7 @@ public class ApiServer {
         try {
             //Inicio de Seccion
             if (path.equals("/login") && method.equals("POST")) {
-                return new String[]{jsonType,dbConnection.login(body)};
+                return new String[]{jsonType,dbConnection.login(body,true)};
                 
             //Registrar usuario nuevo
             } else if (path.equals("/register") && method.equals("POST")) {
@@ -156,16 +156,18 @@ public class ApiServer {
     }
     
     private static String confirmUser(String body){
-        JSONObject bodyObject = new JSONObject(body);
         JSONObject dataUser = new JSONObject();
         JSONObject response = new JSONObject();
+        JSONArray data = new JSONArray(body);
         
-        dataUser.put("cedula", String.valueOf(new StringBuilder(dataUser.getString("examinador_cedula"))));
-        dataUser.put("password", String.valueOf(new StringBuilder(dataUser.getString("password"))));
-        JSONObject user=new JSONObject(dbConnection.login(dataUser.toString()));
+        dataUser.put("cedula", String.valueOf(new StringBuilder(data.getJSONObject(0).getString("examinador_cedula"))));
+        dataUser.put("password", String.valueOf(new StringBuilder(data.getJSONObject(0).getString("password"))));
+        
+        JSONObject user=new JSONObject(dbConnection.login(dataUser.toString(),false));
+        System.out.println(user);
         try{
             if(user.getBoolean("success")){
-                JSONArray data = new JSONArray(body);
+                
                 for (int i=0;i<data.length();i++){
                     data.getJSONObject(i).remove("password");
                 }
@@ -173,7 +175,7 @@ public class ApiServer {
                 System.out.println(data.toString());
                 //
                 response=new JSONObject(dbConnection.recieverDataMobile(data.toString()));
-            }else if(user.getBoolean("failed")){
+            }else {
                 response.put("failed", "El usuario que envio los datos no se encuentra registrado en este equipo");
             }
         }catch(Exception e){
