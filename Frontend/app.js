@@ -196,7 +196,6 @@ async function getIP() {
                 'Content-Type': 'application/json'
             }
         });
-        console.log(response);
         const data = await response.json();
         if (!response.ok || data.error) {
             throw new Error(data.error || 'Error al obtener la IP');
@@ -246,6 +245,25 @@ async function exportToCsv() {
     }
 }
 
+async function getForms(){
+    try {
+        const response = await fetch(`${API_BASE_URL}/getForms`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al cargar usuarios');
+        }
+        document.getElementById('export-message').innerHTML = 'El numero de formularios en el sistemas es: '+ data.forms;
+        return data;
+    } catch (error) {
+        showStatus('Error al cargar usuarios: ' + error.message, 'error');
+    }
+}
+
 async function deleteDB() {
     try {
         const response = await fetch(`${API_BASE_URL}/deleteDB`,{
@@ -258,6 +276,7 @@ async function deleteDB() {
         if (!response.ok || data.error) {
             throw new Error(data.error || 'Error al obtener los formularios');
         }
+        getForms();
         return data;
     } catch (error) {
         showStatus('Error al obtener los formularios: ' + error.message, 'error');
@@ -301,6 +320,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Cargar usuarios inicialmente si es necesario
                 if (currentOption === 'users') {
                     fillTableUsers();
+                }
+                if (currentOption === 'export') {
+                    getForms();
                 }
             }
         });

@@ -273,6 +273,26 @@ public class dbConnection {
         return response.toString();
     }
     
+    public static String forms(){
+        con = conectar();
+        JSONObject response = new JSONObject();
+        
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT count(*) FROM formularios");
+            if (rs.next()) {
+                response.put("success",true);
+                response.put("forms",rs.getInt(1));
+            }
+            con.close();
+
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        System.out.println(response);
+        return response.toString();
+    }
+    
     public static String exportArchiveCSV(String json){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
@@ -320,7 +340,7 @@ public class dbConnection {
         con = conectar();
         try{
             Statement stmt = con.createStatement();
-            stmt.executeQuery("TRUNCATE TABLE formularios");
+            stmt.executeUpdate("DELETE FROM formularios");
             response.put("success",true);
             con.close();
 

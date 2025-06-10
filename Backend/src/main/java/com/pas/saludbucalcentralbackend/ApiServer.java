@@ -134,6 +134,10 @@ public class ApiServer {
             }else if (path.equals("/recieverData") && method.equals("POST")) {
                 return new String[]{jsonType,confirmUser(body)};
             
+            //Mostrar cantidad de registros
+            } else if (path.equals("/getForms") && method.equals("GET")) {
+                return new String[]{jsonType,dbConnection.forms()};
+            
             //Exportar CSV
             } else if (path.equals("/exportCSV") && method.equals("POST")) {
                 return new String[]{csv,dbConnection.exportArchiveCSV(body)};
