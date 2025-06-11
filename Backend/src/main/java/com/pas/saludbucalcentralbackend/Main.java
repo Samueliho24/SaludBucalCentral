@@ -22,6 +22,7 @@ public class Main {
             System.out.println("Servidor Activo");
             ApiServer.httpServer();
             
+            
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al iniciar XAMPP: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;

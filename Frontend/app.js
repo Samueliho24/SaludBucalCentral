@@ -282,8 +282,27 @@ async function deleteDB() {
         showStatus('Error al obtener los formularios: ' + error.message, 'error');
     }
 }
-
+async function openedTime() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/openedTime`,{
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        
+        return data;
+    } catch (error) {
+        showStatus('Error al obtener los formularios: ' + error.message, 'error');
+    }
+}
 //Enlace con el HTML
+
+setInterval(async () => {
+    const data = await openedTime();
+    console.log(data);
+}, 500);
 
 // Esperar a que el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {

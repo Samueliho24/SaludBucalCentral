@@ -10,24 +10,40 @@ import org.json.JSONObject;
 import com.pas.saludbucalcentralbackend.database.dbConnection;
 
 import java.security.MessageDigest;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ApiServer {
     private static final long SECRET_KEY = 0xA23A23D;
-    
+    private static boolean frontOpened = true;
     private static final int port = 8080;
     private static ServerSocket serverSocket;
     private static Socket clientSocket;
+    private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private static final long INACTIVITY_TIMEOUT = 10000; // 30 segundos
+    private static volatile long lastActivityTime = System.currentTimeMillis();
     private PrintWriter out;
     private BufferedReader in;
     
     public static void httpServer(){
+        executor.scheduleAtFixedRate(() -> {
+            if (System.currentTimeMillis() - lastActivityTime > INACTIVITY_TIMEOUT) {
+                System.out.println("Cerrando por inactividad...");
+                try {
+                    if (serverSocket != null) serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.exit(0);
+            }
+        }, 0, 1, TimeUnit.SECONDS);
         try {
             serverSocket = new ServerSocket(port);
             while(true){
                 clientSocket = serverSocket.accept();
                 new Thread(() -> handleClientRequest(clientSocket)).start();
+                
             }
         } catch (IOException ex) {
             Logger.getLogger(ApiServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -94,6 +110,7 @@ public class ApiServer {
         }
     }
     private static String[] processRequest(String method, String path, String body) {
+        lastActivityTime = System.currentTimeMillis();
         System.out.println("HTTP [" + method + "] " + path + " = '" + body + "'");
         String jsonType = "application/json";
         String csv = "text/csv";
@@ -141,9 +158,14 @@ public class ApiServer {
             //Exportar CSV
             } else if (path.equals("/exportCSV") && method.equals("POST")) {
                 return new String[]{csv,dbConnection.exportArchiveCSV(body)};
+                
+            } else if (path.equals("/openedTime") && method.equals("DELETE")){
+                lastActivityTime = System.currentTimeMillis();
+                return new String[]{jsonType,frontendLoop()};
             } else {
                 return new String[]{jsonType,new JSONObject().put("error", "Ruta no encontrada").toString()};
             }
+            
         } catch (Exception e) {
             return new String[]{jsonType,new JSONObject().put("error", e.getMessage()).toString()};
         }
@@ -171,7 +193,6 @@ public class ApiServer {
         dataUser.put("password", String.valueOf(new StringBuilder(data.getJSONObject(0).getString("password"))));
         
         JSONObject user=new JSONObject(dbConnection.login(dataUser.toString(),false));
-        System.out.println(user);
         try{
             if(user.getBoolean("success")){
                 
@@ -189,6 +210,13 @@ public class ApiServer {
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,e);
             response.put("failed", "El usuario que envio los datos no pudo ser validado");
         }
+        return response.toString();
+    }
+    
+    private static String frontendLoop(){
+        JSONObject response = new JSONObject();
+        response.put("success",true);
+        frontOpened = true;
         return response.toString();
     }
     
