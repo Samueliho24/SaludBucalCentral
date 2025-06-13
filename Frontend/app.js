@@ -302,7 +302,7 @@ async function openedTime() {
 setInterval(async () => {
     const data = await openedTime();
     console.log(data);
-}, 500);
+}, 5000);
 
 // Esperar a que el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {

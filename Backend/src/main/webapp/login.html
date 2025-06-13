@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="styles.css">
+    <title>Inicio de Sesión</title>
+</head>
+<body>
+    <header>
+        <img id="logo-facoluz" src="assets/Logo_FacoLuz.png" alt="Logo Facultad de Odontologia">
+        <div class="container">
+            <h1>Sistema de recoleccion de datos de evaluacion bucal</h1>
+        </div>
+        <img id="logo-instituto" src="assets/Logo_LUZ.png" alt="Logo Instituto de investigacion">
+    </header>
+    <div class="container">
+        <div class="section login">
+            <div id="status-message" class="status"></div>
+            <h2>Iniciar Sesión</h2>
+            <form id="login-form">
+                <label for="cedula">Cedula:</label>
+                <input type="text" id="cedula" name="cedula" required>
+                
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer container">
+            <p>&copy; 2025 Sistema de recoleccion de datos de evaluacion bucal - Facultad de Odontologia de La Universidad del Zulia</p>
+        </div>
+    </footer>
+    
+    <script src="app.js"></script>
+</body>
+</html>

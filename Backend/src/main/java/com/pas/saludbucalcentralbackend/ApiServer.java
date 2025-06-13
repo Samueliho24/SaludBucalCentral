@@ -21,7 +21,7 @@ public class ApiServer {
     private static ServerSocket serverSocket;
     private static Socket clientSocket;
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private static final long INACTIVITY_TIMEOUT = 10000; // 30 segundos
+    private static final long INACTIVITY_TIMEOUT = 10000; // 15 segundos
     private static volatile long lastActivityTime = System.currentTimeMillis();
     private PrintWriter out;
     private BufferedReader in;
@@ -29,7 +29,7 @@ public class ApiServer {
     public static void httpServer(){
         executor.scheduleAtFixedRate(() -> {
             if (System.currentTimeMillis() - lastActivityTime > INACTIVITY_TIMEOUT) {
-                System.out.println("Cerrando por inactividad...");
+                System.out.println("Cerrando Servidor por inactividad...");
                 try {
                     if (serverSocket != null) serverSocket.close();
                 } catch (IOException e) {
@@ -51,7 +51,7 @@ public class ApiServer {
     }
     
     private static void handleClientRequest(Socket clientSocket) {
-	    System.out.println("HTTP: Handle Client: " + clientSocket.toString());
+        System.out.println("HTTP: Handle Client: " + clientSocket.toString());
         try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
             
@@ -131,10 +131,12 @@ public class ApiServer {
             } else if (path.equals("/deleteUser") && method.equals("DELETE")) {
                 System.out.println("Borrado DELETE");
                 return new String[]{jsonType,dbConnection.deleteUser(body)};
-                //Borrar Formularios
+                
+            //Borrar Formularios
             } else if (path.equals("/deleteDB") && method.equals("DELETE")) {
                 System.out.println("Borrado DELETE");
                 return new String[]{jsonType,dbConnection.deleteDB()};
+                
             //Sincronizacion de usuarios
             } else if (path.equals("/syncUsers") && method.equals("GET")) {
                 return new String[]{jsonType,dbConnection.syncUsersMobile()};
@@ -159,9 +161,11 @@ public class ApiServer {
             } else if (path.equals("/exportCSV") && method.equals("POST")) {
                 return new String[]{csv,dbConnection.exportArchiveCSV(body)};
                 
+            //Comprobacion de que la interfaz de usuario sigue funcionando
             } else if (path.equals("/openedTime") && method.equals("DELETE")){
                 lastActivityTime = System.currentTimeMillis();
                 return new String[]{jsonType,frontendLoop()};
+                
             } else {
                 return new String[]{jsonType,new JSONObject().put("error", "Ruta no encontrada").toString()};
             }

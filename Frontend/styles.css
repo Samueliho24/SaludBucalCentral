@@ -11,12 +11,24 @@ header {
     background-color: #2c3e50;
     color: white;
     padding: 10px 0;
+    display: flex;
 }
 
+header #logo-instituto {
+    height: 100px;
+    margin: 2vh 1vw;
+}
+
+header #logo-facoluz {
+    height: 100px;
+    width: 200px;
+    margin: 2vh 1vw;
+}
 
 header h1 {
     margin: 0;
     text-align: center;
+    margin-left: -7vw;
 }
 
 h2 {

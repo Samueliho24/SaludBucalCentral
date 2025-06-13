@@ -38,6 +38,28 @@ public class dbConnection {
         
         return conexion;
     }
+    public static void createDB(){
+        con=conectar();
+        String sqlUsuarios = createSQL.getUsuarios();
+        String sqlFormularios = createSQL.getFormularios();
+
+        try {
+            
+            Statement stmt = con.createStatement();
+            //Creando tablas de la base de datos
+            stmt.execute(sqlUsuarios);
+            stmt.execute(sqlFormularios);
+            
+            //Insertando Usuario admin
+            PreparedStatement psmt = con.prepareStatement("INSERT INTO usuarios (cedula,nombre,password,tipo) VALUES (1234,'Admin','d033e22ae348aeb5660fc2140aec35850c4da997','Investigador')");
+            psmt.executeUpdate();
+            System.out.println("Base de datos creada con exito");
+            con.close();
+        } catch (Exception e) {
+            System.err.println("Error al crear la base de datos: " + e.getMessage());
+        }
+        
+    }
     
     public static String login(String json, boolean hash){
         con = conectar();
