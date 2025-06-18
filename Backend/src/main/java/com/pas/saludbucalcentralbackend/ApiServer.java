@@ -21,7 +21,7 @@ public class ApiServer {
     private static ServerSocket serverSocket;
     private static Socket clientSocket;
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private static final long INACTIVITY_TIMEOUT = 10000; // 15 segundos
+    private static final long INACTIVITY_TIMEOUT = 10000; // 10 segundos
     private static volatile long lastActivityTime = System.currentTimeMillis();
     private PrintWriter out;
     private BufferedReader in;
@@ -37,7 +37,7 @@ public class ApiServer {
                 }
                 System.exit(0);
             }
-        }, 0, 1, TimeUnit.SECONDS);
+        }, 30, 1, TimeUnit.SECONDS);
         try {
             serverSocket = new ServerSocket(port);
             while(true){
@@ -93,7 +93,7 @@ public class ApiServer {
             out.println("HTTP/1.1 200 OK");
             out.println("Content-Type: " + response[0]);
             out.println("Access-Control-Allow-Origin: *"); // Permite cualquier origen
-            out.println("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE");
+            out.println("Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS, DELETE");
             out.println("Access-Control-Allow-Headers: Content-Type");
             out.println("Connection: close");
             out.println();
@@ -124,18 +124,16 @@ public class ApiServer {
                 return new String[]{jsonType,dbConnection.registerUser(body)};
                 
             //Cambiar contraseña
-            }else if (path.equals("/changePassword") && method.equals("POST")) {
+            }else if (path.equals("/changePasswo rd") && method.equals("PUT")) {
                 return new String[]{jsonType,dbConnection.changePassword(body)};
                 
             //Borrado y desactivacion de usuario
             } else if (path.equals("/deleteUser") && method.equals("DELETE")) {
-                System.out.println("Borrado DELETE");
                 return new String[]{jsonType,dbConnection.deleteUser(body)};
                 
             //Borrar Formularios
-            } else if (path.equals("/deleteDB") && method.equals("DELETE")) {
-                System.out.println("Borrado DELETE");
-                return new String[]{jsonType,dbConnection.deleteDB()};
+            } else if (path.equals("/deleteFormsDB") && method.equals("DELETE")) {
+                return new String[]{jsonType,dbConnection.deleteFormsDB()};
                 
             //Sincronizacion de usuarios
             } else if (path.equals("/syncUsers") && method.equals("GET")) {

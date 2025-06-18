@@ -169,9 +169,9 @@ async function fillTableUsers() {
                     <td>${user.nombre || 'N/A'}</td>
                     <td>${user.estado || 'N/A'}</td>
                     <td>${user.tipo || 'N/A'}</td>
-                    <td><button class="table-button delete-button" data-cedula="${user.cedula}" onclick="changePasswordUser(${user.cedula})"><img src="assets/draft-line.svg" alt="Cambiar contraseña"></button>
-                    <button class="table-button desactivate-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, '${accionEstado}')"><img src="assets/user-forbid-line.svg" alt="${accionEstado}"></button>
-                    <button class="table-button delete-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, 'Eliminar')"><img src="assets/delete-bin-line.svg" alt="Borrar"></button></td>
+                    <td><button class="table-button delete-button" data-cedula="${user.cedula}" onclick="changePasswordUser(${user.cedula})"><img src="draft-line.svg" alt="Cambiar contraseña"></button>
+                    <button class="table-button desactivate-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, '${accionEstado}')"><img src="user-forbid-line.svg" alt="${accionEstado}"></button>
+                    <button class="table-button delete-button" data-cedula="${user.cedula}" onclick="deleteUser(${user.cedula}, 'Eliminar')"><img src="delete-bin-line.svg" alt="Borrar"></button></td>
                 `;
                 tbody.appendChild(tr);
             });

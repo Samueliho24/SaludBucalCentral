@@ -11,16 +11,11 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 public class dbConnection {
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
-    private static final String HOST = "localhost";
-    private static final String DATABASE = "pas_central";
-    private static final String PORT = "3306";
-    
     private static final String URL = "jdbc:sqlite:Data.db";
     
     private static Connection con;
-            
+    
+    //Creacion de conexion con base de datos SQLite
     public static Connection conectar() {
         Connection conexion = null;
         
@@ -38,6 +33,8 @@ public class dbConnection {
         
         return conexion;
     }
+    
+    //Creacion de base de datos en caso de no existir
     public static void createDB(){
         con=conectar();
         String sqlUsuarios = createSQL.getUsuarios();
@@ -61,6 +58,7 @@ public class dbConnection {
         
     }
     
+    //Inicio de Sesion al sistema
     public static String login(String json, boolean hash){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
@@ -96,6 +94,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Cambiar la contraseña de un usuario
     public static String changePassword(String json){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
@@ -105,7 +104,7 @@ public class dbConnection {
             PreparedStatement psmt = con.prepareStatement("UPDATE usuarios SET password=? WHERE cedula=?");
             String contrasena=sha1(dataUser.getString("password"));
             psmt.setString(1, contrasena);
-            psmt.setInt(1, dataUser.getInt("cedula"));
+            psmt.setInt(2, dataUser.getInt("cedula"));
             System.out.println(psmt);
             int rs = psmt.executeUpdate();
             if (rs>0){
@@ -120,6 +119,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Registrar usuario nuevo
     public static String registerUser(String json){
         JSONObject jsonObject = new JSONObject(json);
         String[] jsonData = jsonString(jsonObject);
@@ -175,6 +175,7 @@ public class dbConnection {
         
     }
     
+    //Sincronizar usuarios con la aplicacion movil
     public static String syncUsersMobile(){
         con = conectar();
         JSONArray dataArray = new JSONArray();
@@ -204,6 +205,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Obtener lista de usuarios registrados
     public static String users() throws SQLException{
         con = conectar();
         JSONArray dataArray = new JSONArray();
@@ -231,6 +233,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Borrar logico de usuarios
     public static String deleteUser(String json){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
@@ -261,6 +264,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Recepcion de datos de formulario desde la aplicacion movil
     public static String recieverDataMobile(String body){
         JSONArray list = new JSONArray(body);
         JSONObject response = new JSONObject();
@@ -295,6 +299,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Mostrar numero de formularios registrados en la base de datos
     public static String forms(){
         con = conectar();
         JSONObject response = new JSONObject();
@@ -315,6 +320,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Crear archivo CSV para exportar los datos de los formularios
     public static String exportArchiveCSV(String json){
         con = conectar();
         JSONObject dataUser = new JSONObject(json);
@@ -357,7 +363,8 @@ public class dbConnection {
         return response.toString();
     }
     
-    public static String deleteDB(){
+    //Vaciar tabla de formularios
+    public static String deleteFormsDB(){
         JSONObject response = new JSONObject();
         con = conectar();
         try{
@@ -372,6 +379,7 @@ public class dbConnection {
         return response.toString();
     }
     
+    //Extraer id del ultimo usuario registrado
     private static int getLastInsertId(PreparedStatement stmt){
         ResultSet rs;
         try {
@@ -385,6 +393,7 @@ public class dbConnection {
         return -1;
     }
     
+    //Convertir JSONObjent en String
     private static String[] jsonString(JSONObject json){
         // Extracion de las claves y los parametros de argumento a Strings
         StringBuilder keysObject = new StringBuilder();
@@ -403,6 +412,7 @@ public class dbConnection {
         return result;
     }
     
+    //Consultar si la cedula del usuario a registrar pertenece a otro usuario en el sistema
     private static boolean cedulaConsult(int cedula){
         con = conectar();
         try {

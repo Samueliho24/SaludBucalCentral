@@ -208,11 +208,15 @@ tr:hover {
     border: 1px solid #888;
     border-radius: 3px;
     text-align: center;
-    transform: translate(0,50%);
+    transform: translate(0,10vh);
 }
 .modal-content button {
     width: 140px;
     margin: 20px auto;
+}
+
+#image{
+    
 }
 
 .footer{

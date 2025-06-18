@@ -3,44 +3,16 @@ package com.pas.saludbucalcentralbackend;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
-
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.web.WebView;
-import javafx.stage.Stage;
-
-import com.pas.saludbucalcentralbackend.database.dbConnection;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+
+import com.pas.saludbucalcentralbackend.database.dbConnection;
 
 public class Main{
-    
-    /*@Override
-    public void start(Stage primaryStage) {
-        WebView webView = new WebView();
-        
-        // Cargar el HTML principal desde los recursos
-        URL htmlUrl = getClass().getResource("/web/login.html");/*"/web/login.html"
-        if (htmlUrl == null) {
-            System.err.println("No se encontró el archivo HTML");
-            return;
-        }
-        
-        webView.getEngine().load(htmlUrl.toExternalForm());
-        
-        Scene scene = new Scene(webView, 1024, 768);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Aplicación con HTML embebido");
-        primaryStage.show();
-    }*/
-    
     
     public static void main(String[] args) {
         //Comprobar que existe la base de datos y en caso de que no exista crear una
@@ -80,7 +52,6 @@ public class Main{
         // Copiar todos los recursos al directorio temporal
         for (String resource : resources) {
             try (InputStream is = Main.class.getResourceAsStream(resource)) {
-                int i = resources
                 if (is != null) {
                     Path dest = tempDir.resolve(resource.substring(resource.lastIndexOf('/') + 1));
                     Files.copy(is, dest, StandardCopyOption.REPLACE_EXISTING);
@@ -96,16 +67,6 @@ public class Main{
             } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
        /* //File archiveHtml = new File();
         try {
@@ -139,7 +100,6 @@ public class Main{
                 System.out.println("No se pudo abrir el archivo HTML o no se soporta el acceso al escritorio.");
             }
             
-            //launch(args);
             
             
         } catch (Exception e) {
