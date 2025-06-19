@@ -32,9 +32,7 @@ async function loginUser(cedula, password) {
     
     const data = await response.json();
     
-    if (!response.ok || data.error) {
-        throw new Error(data.error || 'Error en la solicitud');
-    }
+    
     currentOption = 'welcome';
     return data;
 }
@@ -88,7 +86,7 @@ async function deleteUser(cedula,accion) {
 }
 async function changePasswordUserData(cedula, password) {
     const response = await fetch(`${API_BASE_URL}/changePassword`, {
-        method: 'POST',
+        method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -264,9 +262,9 @@ async function getForms(){
     }
 }
 
-async function deleteDB() {
+async function deleteFormsDB() {
     try {
-        const response = await fetch(`${API_BASE_URL}/deleteDB`,{
+        const response = await fetch(`${API_BASE_URL}/deleteFormsDB`,{
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -326,6 +324,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('code-sync-message').innerHTML = data.key;
                 document.getElementById('cancel-code-sync-button').addEventListener('click', function() {
                     document.getElementById('code-sync').classList.remove('active');
+                });
+            }else if(this.dataset.option ==="about"){
+                document.getElementById('about').classList.add('active');
+                document.getElementById('cancel-about-button').addEventListener('click', function() {
+                    document.getElementById('about').classList.remove('active');
                 });
             }else {
                 document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.remove('active');
@@ -418,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Manejar botón de exportación
     document.getElementById('export-button').addEventListener('click', exportToCsv);
     
-    document.getElementById('clean-button').addEventListener('click', deleteDB);
+    document.getElementById('clean-button').addEventListener('click', deleteFormsDB);
 
     document.getElementById('cancel-change-password').addEventListener('click', function() {
                     document.getElementById('change-password').classList.remove('active');

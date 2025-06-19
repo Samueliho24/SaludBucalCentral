@@ -16,19 +16,18 @@ header {
 
 header #logo-instituto {
     height: 100px;
-    margin: 2vh 1vw;
+    margin: 2vh 2vw;
 }
 
 header #logo-facoluz {
     height: 100px;
     width: 200px;
-    margin: 2vh 1vw;
+    margin: 2vh 2vw;
 }
 
 header h1 {
     margin: 0;
     text-align: center;
-    margin-left: -7vw;
 }
 
 h2 {
@@ -68,7 +67,7 @@ button:hover {
     background-color: #2980b9;
 }
 
-optionle {
+table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
@@ -200,31 +199,66 @@ tr:hover {
     
 
 .modal-content {
+    position: sticky;
     background-color: white;
     margin: auto;
-    width: 50%;
+    width: 500px;
     max-width: 400px;
     padding: 20px;
     border: 1px solid #888;
     border-radius: 3px;
     text-align: center;
-    transform: translate(0,50%);
+    transform: translate(0,10vh);
 }
 .modal-content button {
     width: 140px;
     margin: 20px auto;
 }
 
-.footer{
-    text-align: center;
+#image{
+    width: 100px;
+    height: 100px;
 }
 
-@media (max-width: 768px) {
+.footer{
+    text-align: center;
+    width: 650px;
+}
+
+
+@media (max-width: 800px) {
+    body{
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+    header h1{
+        width: 580px;
+    }
     form {
         grid-template-columns: 1fr;
     }
-}
 
+    .section{
+        width: 750px;
+    }
+
+    .option-menu{
+        width: 80px;
+    }
+    
+    .menu{
+        width: fit-content;
+    }
+
+    header{
+        width: fit-content;
+    }
+
+    .status{
+        width: 770px;
+    }
+
+}
 
 #refresh-users{
     display: none;

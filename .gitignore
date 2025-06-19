@@ -7,11 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 Backend/target/*
+Backend/Install/*
 Docs
 dist
 dist-ssr
 *.local
-
+Data.db
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

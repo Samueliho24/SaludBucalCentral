@@ -8,11 +8,11 @@
 </head>
 <body>
     <header>
-        <img id="logo-facoluz" src="Logo_FacoLuz.png" alt="Logo Facultad de Odontologia">
+        <div class="image"><img id="logo-facoluz" src="Logo_FacoLuz.png" alt="Logo Facultad de Odontologia"></div>
         <div class="container">
             <h1>Sistema de recoleccion de datos de evaluacion bucal<br>Panel de Administración</h1>
         </div>
-        <img id="logo-instituto" src="" alt="Logo Instituto de investigacion">
+        <div class="image"><img id="logo-instituto" src="" alt="Logo Instituto de investigacion"></div>
     </header>
     
     <div class="menu">
@@ -21,6 +21,7 @@
         <div class="option-menu" data-option="register">Registrar Usuario</div>
         <div class="option-menu" data-option="export">Exportar Datos</div>
         <div class="option-menu" data-option="code-sync">Sincronizar</div>
+        <div class="option-menu" data-option="about">Acerca de</div>
         <div class="option-menu option-menu-last" data-option="logout">Cerrar Sesión</div>
     </div>
     
@@ -134,6 +135,18 @@
             <h2>Sincronización de Código</h2>
             <h4 id="code-sync-message"></h4>
             <button id="cancel-code-sync-button">Cancelar</button>
+        </div>
+    </section>
+
+    <section id="about" class="modal option-content">
+        <div class="modal-content">
+            <h2>Sistema de recopilacion de datos</h2>
+            <P><strong>Version:</strong> 1.1.0</P>
+            <P><strong>Fecha:</strong> 16/06/2025 </P>
+            <p>Sistema para la recoleccion de datos de evaluacion bucal para investigaciones odontologias</p>
+            <p>&copy; Facultad de odontologia - Universidad del Zulia</p>
+            <p>&copy; Departamento de tecnologia, informacion y comunicaciones</p>
+            <button id="cancel-about-button">Cerrar</button>
         </div>
     </section>
 

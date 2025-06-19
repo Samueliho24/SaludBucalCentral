@@ -21,7 +21,7 @@ public class ApiServer {
     private static ServerSocket serverSocket;
     private static Socket clientSocket;
     private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    private static final long INACTIVITY_TIMEOUT = 10000; // 10 segundos
+    private static final long INACTIVITY_TIMEOUT = 30000; // 30 segundos
     private static volatile long lastActivityTime = System.currentTimeMillis();
     private PrintWriter out;
     private BufferedReader in;
@@ -37,7 +37,7 @@ public class ApiServer {
                 }
                 System.exit(0);
             }
-        }, 30, 1, TimeUnit.SECONDS);
+        }, 60, 1, TimeUnit.SECONDS);
         try {
             serverSocket = new ServerSocket(port);
             while(true){

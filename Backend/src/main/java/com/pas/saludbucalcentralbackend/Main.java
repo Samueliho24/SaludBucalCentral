@@ -10,6 +10,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.io.InputStream;
 
+//Librerias para inicio en desarrollo
+import java.net.URI;
+import javax.swing.JOptionPane;
+
 import com.pas.saludbucalcentralbackend.database.dbConnection;
 
 public class Main{
@@ -27,6 +31,9 @@ public class Main{
             }
         }
         
+        
+        //Inicio del programa compilado
+        /*
         String htmlPath = "/web/login.html";
         
         // Crear directorio temporal para todos los recursos
@@ -66,46 +73,23 @@ public class Main{
     
             } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
         
-       /* //File archiveHtml = new File();
+        //Inicio del programa para las pruebas
+        String ruta="C:/Users/Sistemas01/Documents/Proyectos/SaludBucalCentral/Backend/src/main/webapp/login.html";
+        File archiveHtml = new File(ruta);
+        
         try {
-            URL htmlUrl = Main.class.getResource("/web/index.html");
-            if (htmlUrl != null) {
-            // Cargar el HTML desde los recursos
-            InputStream inputStream = htmlUrl;
-            
-            // Crear un archivo temporal
-            File tempFile = File.createTempFile("temp", ".html");
-            tempFile.deleteOnExit();
-            
-            // Copiar el contenido al archivo temporal
-            Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            
-            // Abrir en el navegador predeterminado
-                Desktop.getDesktop().browse(tempFile.toURI());
-            } else {
-                System.out.println("Archivo HTML no encontrado en el JAR");
-            }
-            
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        /*try {
             if (Desktop.isDesktopSupported() && archiveHtml.exists()) {
                 URI uri = archiveHtml.toURI();
                 Desktop.getDesktop().browse(uri);
             } else {
                 System.out.println("No se pudo abrir el archivo HTML o no se soporta el acceso al escritorio.");
             }
-            
-            
-            
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al iniciar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
-        }*/
+        }
         
         //Inicio del servidor
         System.out.println("Servidor Activo");
