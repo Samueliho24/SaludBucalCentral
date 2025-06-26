@@ -131,6 +131,7 @@ tr:hover {
     gap: 10px;
     border-left: 2px solid #000;
     padding: 10px 20px;
+    cursor: pointer;
 }
 .option-menu-last {
     border-right: 2px solid #000;
@@ -244,6 +245,7 @@ tr:hover {
 
     .option-menu{
         width: 80px;
+        
     }
     
     .menu{

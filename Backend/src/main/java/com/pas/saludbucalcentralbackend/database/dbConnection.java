@@ -72,7 +72,7 @@ public class dbConnection {
         
         
         try {
-            PreparedStatement psmt = con.prepareStatement("SELECT nombre,cedula,tipo FROM usuarios WHERE cedula=? AND password=?");
+            PreparedStatement psmt = con.prepareStatement("SELECT nombre,cedula,tipo FROM usuarios WHERE cedula=? AND password=? AND estado = 'Activo'");
             psmt.setLong(1,Long.parseLong(cedula));
             psmt.setString(2, password);
             ResultSet rs = psmt.executeQuery();

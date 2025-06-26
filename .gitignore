@@ -6,8 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-Backend/target/*
-Backend/Install/*
+Backend/target/
+Backend/Install/
+
 Docs
 dist
 dist-ssr

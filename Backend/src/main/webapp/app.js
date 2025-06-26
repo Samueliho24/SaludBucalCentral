@@ -304,6 +304,7 @@ setInterval(async () => {
 
 // Esperar a que el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
+    //history.pushState({}, '', '/');
     // Manejar cambios de pestaña
     document.querySelectorAll('.option-menu').forEach(optionMenu => {
         optionMenu.addEventListener('click', async function() {
@@ -360,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const response = await loginUser(cedula, password);
-                console.log(response);
                 if (response.failed === false) {
                     showStatus("Los datos que ingresaste son incorrectos. Por favor, inténtalo de nuevo", 'error');
                 }else if (response.tipo === 'Investigador') {
@@ -370,7 +370,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentOption = 'welcome';
                     document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.add('active');
                     document.getElementById(currentOption).classList.add('active');
-
                 } else {
                     showStatus('El usuario no es Investigador', 'error');
                 }
@@ -378,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('login-form').reset();
                 // Actualizar la pestaña actual
             } catch (error) {
-                showStatus('Error al iniciar sesión: ' + error.message, 'error');
             }
         });
     }
@@ -422,6 +420,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('export-button').addEventListener('click', exportToCsv);
     
     document.getElementById('clean-button').addEventListener('click', deleteFormsDB);
+
+    document.getElementById('actualizar-button').addEventListener('click', getForms);
 
     document.getElementById('cancel-change-password').addEventListener('click', function() {
                     document.getElementById('change-password').classList.remove('active');

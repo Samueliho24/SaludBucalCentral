@@ -33,7 +33,7 @@ public class Main{
         
         
         //Inicio del programa compilado
-        /*
+        
         String htmlPath = "/web/login.html";
         
         // Crear directorio temporal para todos los recursos
@@ -73,8 +73,8 @@ public class Main{
     
             } catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        
+        }
+        /*
         //Inicio del programa para las pruebas
         String ruta="C:/Users/Sistemas01/Documents/Proyectos/SaludBucalCentral/Backend/src/main/webapp/login.html";
         File archiveHtml = new File(ruta);
@@ -89,7 +89,7 @@ public class Main{
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al iniciar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return;
-        }
+        }*/
         
         //Inicio del servidor
         System.out.println("Servidor Activo");
