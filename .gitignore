@@ -6,13 +6,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-Backend/target/
-Backend/Install/
-
+Backend/target/*
+Backend/Install/*
 Docs
 dist
 dist-ssr
 *.local
+Backend/Data.db
 Data.db
 # Editor directories and files
 .vscode/*

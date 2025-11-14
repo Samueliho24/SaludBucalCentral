@@ -32,7 +32,7 @@ async function loginUser(cedula, password) {
     
     const data = await response.json();
     
-    
+    console.log(data);
     currentOption = 'welcome';
     return data;
 }
@@ -304,7 +304,7 @@ setInterval(async () => {
 
 // Esperar a que el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
-    history.pushState({}, '', '/');
+    //history.pushState({}, '', '/');
     // Manejar cambios de pestaña
     document.querySelectorAll('.option-menu').forEach(optionMenu => {
         optionMenu.addEventListener('click', async function() {
@@ -398,11 +398,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('Las contraseñas no coinciden');
             }
             const response = await registerUserData(nombre, cedula, password, tipo);
-            showStatus('Usuario registrado exitosamente.', 'success');
             if(response.failed === false) {
                 showStatus('El usuario con la cedula ' + cedula + ' ya existe', 'error');
+            }else{
+                showStatus('Usuario registrado exitosamente.', 'success');
+                document.querySelector(`.option-menu[data-option="${currentOption}"]`).classList.remove('active');
+                document.getElementById(currentOption).classList.remove('active');
+                    
+                // Activar nueva pestaña
+                currentOption = 'users';
+                this.classList.add('active');
+                document.getElementById(currentOption).classList.add('active');
             }
             document.getElementById('register-form').reset();
+            
             
             // Si estamos en la pestaña de usuarios, actualizar la lista
             if (currentOption === 'users') {
@@ -424,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('actualizar-button').addEventListener('click', getForms);
 
     document.getElementById('cancel-change-password').addEventListener('click', function() {
-                    document.getElementById('change-password').classList.remove('active');
-                });
+        document.getElementById('change-password').classList.remove('active');
+    });
     
 });

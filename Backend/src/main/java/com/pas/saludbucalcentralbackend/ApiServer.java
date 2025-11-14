@@ -124,7 +124,7 @@ public class ApiServer {
                 return new String[]{jsonType,dbConnection.registerUser(body)};
                 
             //Cambiar contraseña
-            }else if (path.equals("/changePasswo rd") && method.equals("PUT")) {
+            }else if (path.equals("/changePassword") && method.equals("PUT")) {
                 return new String[]{jsonType,dbConnection.changePassword(body)};
                 
             //Borrado y desactivacion de usuario
