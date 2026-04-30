@@ -109,6 +109,7 @@ public class ApiServer {
             }
         }
     }
+    
     private static String[] processRequest(String method, String path, String body) {
         lastActivityTime = System.currentTimeMillis();
         System.out.println("HTTP [" + method + "] " + path + " = '" + body + "'");
@@ -145,7 +146,9 @@ public class ApiServer {
                 
             //Obtener codigo Ip
             } else if (path.equals("/ipKey") && method.equals("GET")) {
-                return new String[]{jsonType,ipKey()};
+                String osName = System.getProperty("os.name");
+                System.out.println(osName);
+                return new String[]{jsonType, (osName.startsWith("Win") ? ipKeyWin() : ipKeyLinux())};
                 
             //Recibir datos de los dispositivos
             }else if (path.equals("/recieverData") && method.equals("POST")) {
@@ -222,16 +225,44 @@ public class ApiServer {
         return response.toString();
     }
     
-    private static String ipKey(){
+    //Obtener direccion IP de una conputadora con Windows
+    private static String ipKeyWin(){
         JSONObject response = new JSONObject();
         try {
             InetAddress address = InetAddress.getLocalHost();
             String ip = address.getHostAddress();
-            
             response.put("success",true);
             response.put("key", encryptIP(ip));
         } catch (UnknownHostException ex) {
             Logger.getLogger(ApiServer.class.getName()).log(Level.SEVERE, null, ex);
+            response.put("failed", false);
+        }
+        return response.toString();
+    }
+    
+    //Obtener direccion IP de una conputadora con Linux (prueba en LinuxMint)
+    private static String ipKeyLinux() {
+        JSONObject response = new JSONObject();
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                // Ignorar interfaces inactivas o de loopback (127.0.0.1)
+                if (iface.isLoopback() || !iface.isUp()) continue;
+
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    // Buscamos una dirección IPv4 que no sea local
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
+                        response.put("success",true);
+                        String ip = String.valueOf(addr.getHostAddress());
+                        response.put("key", encryptIP(ip));
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
             response.put("failed", false);
         }
         return response.toString();

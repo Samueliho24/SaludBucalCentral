@@ -75,9 +75,10 @@ public class Main{
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
         */
-        //Inicio del programa para las pruebas
+        /*Inicio del programa para las pruebas
+          Hay que cambiar la ruta de dereccion del proyecto para ejecutar*/
         //String ruta="C:/Users/Sistemas01/Documents/Proyectos/SaludBucalCentral/Backend/src/main/webapp/login.html";
-        String ruta="C:/Users/SAM/Documents/Projects/SaludBucalCentral/Backend/src/main/webapp/login.html";
+        String ruta="//home/sistemas01/Documents/Projects/SaludBucalCentral/Backend/src/main/webapp/login.html";
         File archiveHtml = new File(ruta);
         
         try {
@@ -96,6 +97,4 @@ public class Main{
         System.out.println("Servidor Activo");
         ApiServer.httpServer();
     }
-    
-    
 }
