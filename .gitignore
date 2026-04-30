@@ -10,7 +10,7 @@ lerna-debug.log*
 Backend/target/
 Backend/Install/
 Backend/Install-old/
-Docs
+
 dist
 dist-ssr
 *.local
