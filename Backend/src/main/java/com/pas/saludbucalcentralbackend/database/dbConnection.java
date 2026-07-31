@@ -39,6 +39,8 @@ public class dbConnection {
         con=conectar();
         String sqlUsuarios = createSQL.getUsuarios();
         String sqlFormularios = createSQL.getFormularios();
+        String sqlSocioeconomico = createSQL.getSocioeconomico();
+        String sqlTriggerHabitos = createSQL.getTriggerHabitos();
 
         try {
             
@@ -46,9 +48,13 @@ public class dbConnection {
             //Creando tablas de la base de datos
             stmt.execute(sqlUsuarios);
             stmt.execute(sqlFormularios);
+            stmt.execute(sqlSocioeconomico);
+            
+            //Creando trigger
+            stmt.execute(sqlTriggerHabitos);
             
             //Insertando Usuario admin
-            PreparedStatement psmt = con.prepareStatement("INSERT INTO usuarios (cedula,nombre,password,tipo) VALUES (1234,'Admin','d033e22ae348aeb5660fc2140aec35850c4da997','Investigador')");
+            PreparedStatement psmt = con.prepareStatement("INSERT OR IGNORE INTO usuarios (cedula,nombre,password,tipo) VALUES (1234,'Admin','d033e22ae348aeb5660fc2140aec35850c4da997','Investigador')");
             psmt.executeUpdate();
             System.out.println("Base de datos creada con exito");
             con.close();
@@ -270,27 +276,70 @@ public class dbConnection {
         JSONObject response = new JSONObject();
         System.out.println("[recieverData] Got " + list.length() + " rows.");
         
+        // Separar registros por tabla destino
+        JSONArray formulariosRows = new JSONArray();
+        JSONArray socioeconomicoRows = new JSONArray();
+        
+        for (int i = 0; i < list.length(); i++) {
+            JSONObject row = list.getJSONObject(i);
+            if (row.has("_table") && row.getString("_table").equals("socioeconomico")) {
+                row.remove("_table");
+                socioeconomicoRows.put(row);
+            } else {
+                row.remove("_table");
+                formulariosRows.put(row);
+            }
+        }
+        
         try {
             con = conectar();
-            for (int i = 0; i < list.length(); i++) {
-                JSONObject row = list.getJSONObject(i);
-                String[] jsonData = jsonString(row);
-                String sql = "INSERT INTO formularios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
-                System.out.println("[recieverData] Execute SQL: '" + sql + "'");
-                PreparedStatement psmt = con.prepareStatement(sql);
-                int j = 1;
-                Iterator<String> keys = row.keys();
-                while(keys.hasNext()) {
-                        String key = keys.next();
-                        Object obj = row.get(key);
-                        if (obj instanceof Integer)
-                            psmt.setInt(j, (Integer)obj);
-                        if (obj instanceof String)
-                            psmt.setString(j, (String)obj);
-                        j++;
+            
+            // Insertar en formularios
+            if (formulariosRows.length() > 0) {
+                for (int i = 0; i < formulariosRows.length(); i++) {
+                    JSONObject row = formulariosRows.getJSONObject(i);
+                    String[] jsonData = jsonString(row);
+                    String sql = "INSERT INTO formularios (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
+                    System.out.println("[recieverData] Execute SQL formularios: '" + sql + "'");
+                    PreparedStatement psmt = con.prepareStatement(sql);
+                    int j = 1;
+                    Iterator<String> keys = row.keys();
+                    while(keys.hasNext()) {
+                            String key = keys.next();
+                            Object obj = row.get(key);
+                            if (obj instanceof Integer)
+                                psmt.setInt(j, (Integer)obj);
+                            if (obj instanceof String)
+                                psmt.setString(j, (String)obj);
+                            j++;
+                    }
+                    psmt.executeUpdate();
                 }
-                psmt.executeUpdate();
             }
+            
+            // Insertar en socioeconomico
+            if (socioeconomicoRows.length() > 0) {
+                for (int i = 0; i < socioeconomicoRows.length(); i++) {
+                    JSONObject row = socioeconomicoRows.getJSONObject(i);
+                    String[] jsonData = jsonString(row);
+                    String sql = "INSERT INTO socioeconomico (" + jsonData[0] + ") VALUES(" + jsonData[1] + ")";
+                    System.out.println("[recieverData] Execute SQL socioeconomico: '" + sql + "'");
+                    PreparedStatement psmt = con.prepareStatement(sql);
+                    int j = 1;
+                    Iterator<String> keys = row.keys();
+                    while(keys.hasNext()) {
+                            String key = keys.next();
+                            Object obj = row.get(key);
+                            if (obj instanceof Integer)
+                                psmt.setInt(j, (Integer)obj);
+                            if (obj instanceof String)
+                                psmt.setString(j, (String)obj);
+                            j++;
+                    }
+                    psmt.executeUpdate();
+                }
+            }
+            
             con.close();
         } catch (SQLException ex){
             Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
@@ -425,5 +474,80 @@ public class dbConnection {
         } catch (Exception e) {
         }
         return false;
+    }
+    
+    //Mostrar numero de formularios socioeconomicos registrados
+    public static String socioeconomicoForms(){
+        con = conectar();
+        JSONObject response = new JSONObject();
+        
+        try{
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT count(*) FROM socioeconomico");
+            if (rs.next()) {
+                response.put("success",true);
+                response.put("forms",rs.getInt(1));
+            }
+            con.close();
+
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        return response.toString();
+    }
+    
+    //Crear archivo CSV para exportar los datos socioeconomicos
+    public static String exportSocioeconomicoCSV(String json){
+        con = conectar();
+        JSONObject response = new JSONObject();
+        String csvContent;
+        try {
+            PreparedStatement psmt = con.prepareStatement("SELECT * FROM socioeconomico");
+            ResultSet rs = psmt.executeQuery();
+            File csvFile = File.createTempFile("export-socio-", ".csv");
+            try (PrintWriter writer = new PrintWriter(csvFile)) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
+                for (int i = 1; i <= columnCount; i++) {
+                    writer.print(metaData.getColumnName(i));
+                    if (i < columnCount) writer.print(",");
+                }
+                writer.println();
+
+                while (rs.next()) {
+                    for (int i = 1; i <= columnCount; i++) {
+                        writer.print(rs.getString(i));
+                        if (i < columnCount) writer.print(",");
+                    }
+                    writer.println();
+                }
+            }
+            csvContent = new String(java.nio.file.Files.readAllBytes(csvFile.toPath()));
+            response.put("success", true);
+            response.put("data", csvContent);
+
+            csvFile.delete();
+            con.close();
+        } catch (Exception e) {
+            response.put("error", e.toString());
+        }
+        return response.toString();
+    }
+    
+    //Vaciar tabla de socioeconomico
+    public static String deleteSocioeconomicoDB(){
+        JSONObject response = new JSONObject();
+        con = conectar();
+        try{
+            Statement stmt = con.createStatement();
+            stmt.executeUpdate("DELETE FROM socioeconomico");
+            response.put("success",true);
+            con.close();
+
+        } catch (SQLException ex){
+            Logger.getLogger(dbConnection.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        return response.toString();
     }
 }

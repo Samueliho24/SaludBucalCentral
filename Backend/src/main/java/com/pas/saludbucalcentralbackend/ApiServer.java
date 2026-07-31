@@ -162,6 +162,18 @@ public class ApiServer {
             } else if (path.equals("/exportCSV") && method.equals("POST")) {
                 return new String[]{csv,dbConnection.exportArchiveCSV(body)};
                 
+            //Exportar CSV socioeconomico
+            } else if (path.equals("/exportSocioeconomicoCSV") && method.equals("POST")) {
+                return new String[]{csv,dbConnection.exportSocioeconomicoCSV(body)};
+                
+            //Cantidad de formularios socioeconomicos
+            } else if (path.equals("/getSocioeconomico") && method.equals("GET")) {
+                return new String[]{jsonType,dbConnection.socioeconomicoForms()};
+                
+            //Vaciar tabla socioeconomico
+            } else if (path.equals("/deleteSocioeconomicoDB") && method.equals("DELETE")) {
+                return new String[]{jsonType,dbConnection.deleteSocioeconomicoDB()};
+                
             //Comprobacion de que la interfaz de usuario sigue funcionando
             } else if (path.equals("/openedTime") && method.equals("DELETE")){
                 lastActivityTime = System.currentTimeMillis();

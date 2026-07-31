@@ -172,6 +172,83 @@ public class createSQL {
     public static String getFormularios() {
         return formularios;
     }
-    
-    
+
+    private static String socioeconomico = "CREATE TABLE IF NOT EXISTS socioeconomico(\n" +
+    "\tfecha datetime default CURRENT_TIMESTAMP,\n" +
+    "\texaminador text not null,\n" +
+    "\texaminador_cedula integer not null,\n" +
+    "\tcedula integer not null,\n" +
+    "\tnombre text not null,\n" +
+    "\tapellido text not null,\n" +
+    "\tgenero text not null,\n" +
+    "\tedad integer not null,\n" +
+    "\tautoidentificacion_etnica text not null,\n" +
+    "\tetnia_indigena text,\n" +
+    "\tetnia_otro text,\n" +
+    "\tdiscapacidad_funcional text not null,\n" +
+    "\tnivel_independencia text not null,\n" +
+    "\ttiene_familiares text not null,\n" +
+    "\tfrecuencia_visitas text not null,\n" +
+    "\tingresos_pension text not null,\n" +
+    "\tingresos_jubilacion text not null,\n" +
+    "\tingresos_familiares text not null,\n" +
+    "\tingresos_bonos text not null,\n" +
+    "\tingresos_ninguno text not null,\n" +
+    "\tingresos_otro text not null,\n" +
+    "\tingresos_otro_text text,\n" +
+    "\tnecesidades_cubiertas text not null,\n" +
+    "\tfrecuencia_cepillado text not null,\n" +
+    "\tquien_higiene text not null,\n" +
+    "\tproducto_cepillo text not null,\n" +
+    "\tproducto_crema text not null,\n" +
+    "\tproducto_enjuague text not null,\n" +
+    "\tproducto_hilo text not null,\n" +
+    "\tproducto_protesis text not null,\n" +
+    "\tproducto_ninguno text not null,\n" +
+    "\tusa_protesis text not null,\n" +
+    "\tdesde_cuando_protesis text,\n" +
+    "\tcomo_adquirio_protesis text,\n" +
+    "\tlimpia_boca_protesis text,\n" +
+    "\tlimpia_dentadura_protesis text,\n" +
+    "\tprotesis_dolor text,\n" +
+    "\tprotesis_mueven text,\n" +
+    "\tprotesis_rota text,\n" +
+    "\tprotesis_otra_molestia text,\n" +
+    "\tprotesis_otra_molestia_text text,\n" +
+    "\tdolor_bucal text not null,\n" +
+    "\tencias_sangran text not null,\n" +
+    "\tultima_vez_odontologo text not null,\n" +
+    "\tes_fumador text not null,\n" +
+    "\tcantidad_cigarrillos text,\n" +
+    "\tconsumo_alcohol text not null,\n" +
+    "\tfrecuencia_alcohol text,\n" +
+    "\texportado int default 0\n" +
+    ");";
+
+    private static String triggerHabitos = "CREATE TRIGGER IF NOT EXISTS habitos_ninguno_set AFTER INSERT ON formularios\n" +
+    "FOR EACH ROW\n" +
+    "BEGIN\n" +
+    "\tUPDATE formularios SET habitos_ninguno = 1 WHERE\n" +
+    "\t\tfecha = NEW.fecha AND\n" +
+    "\t\thabitos_bruxismo = '0' AND\n" +
+    "\t\thabitos_respiracion_bucal = '0' AND\n" +
+    "\t\thabitos_deglucion_atipica = '0' AND\n" +
+    "\t\thabitos_succion_digital = '0';\n" +
+    "\tUPDATE formularios SET habitos_ninguno = 0 WHERE\n" +
+    "\t\tfecha = NEW.fecha AND (\n" +
+    "\t\t\thabitos_bruxismo != '0' OR\n" +
+    "\t\t\thabitos_respiracion_bucal != '0' OR\n" +
+    "\t\t\thabitos_deglucion_atipica != '0' OR\n" +
+    "\t\t\thabitos_succion_digital != '0'\n" +
+    "\t);\n" +
+    "END;";
+
+    public static String getSocioeconomico() {
+        return socioeconomico;
+    }
+
+    public static String getTriggerHabitos() {
+        return triggerHabitos;
+    }
+
 }

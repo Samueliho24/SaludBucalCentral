@@ -295,6 +295,81 @@ async function openedTime() {
         showStatus('Error al obtener los formularios: ' + error.message, 'error');
     }
 }
+
+// Funciones para datos socioeconomicos
+
+async function getSocioeconomicoForms(){
+    try {
+        const response = await fetch(`${API_BASE_URL}/getSocioeconomico`,{
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al cargar formularios socioeconomicos');
+        }
+        document.getElementById('socioeconomico-message').innerHTML = 'El numero de formularios socioeconomicos en el sistema es: '+ data.forms;
+        return data;
+    } catch (error) {
+        showStatus('Error al cargar formularios socioeconomicos: ' + error.message, 'error');
+    }
+}
+
+async function exportSocioeconomicoToCsv() {
+    const userData = JSON.parse(sessionStorage.getItem('userAuth'));
+    try {
+        const response = await fetch(`${API_BASE_URL}/exportSocioeconomicoCSV`,{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+            "nombre": userData.nombre,
+            "cedula": userData.cedula,
+            "tipo": userData.tipo
+        })
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al exportar datos socioeconomicos');
+        }
+        
+        const blob = new Blob([data.data], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Datos_socioeconomicos.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showStatus('Datos socioeconomicos exportados exitosamente', 'success');
+    } catch (error) {
+        showStatus('Error al exportar datos socioeconomicos: ' + error.message, 'error');
+    }
+}
+
+async function deleteSocioeconomicoDB() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/deleteSocioeconomicoDB`,{
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (!response.ok || data.error) {
+            throw new Error(data.error || 'Error al vaciar formularios socioeconomicos');
+        }
+        getSocioeconomicoForms();
+        return data;
+    } catch (error) {
+        showStatus('Error al vaciar formularios socioeconomicos: ' + error.message, 'error');
+    }
+}
 //Enlace con el HTML
 
 setInterval(async () => {
@@ -346,6 +421,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (currentOption === 'export') {
                     getForms();
+                }
+                if (currentOption === 'socioeconomico') {
+                    getSocioeconomicoForms();
                 }
             }
         });
@@ -435,5 +513,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('cancel-change-password').addEventListener('click', function() {
         document.getElementById('change-password').classList.remove('active');
     });
+
+    // Botones de datos socioeconomicos
+    document.getElementById('actualizar-socioeconomico-button').addEventListener('click', getSocioeconomicoForms);
+    document.getElementById('export-socioeconomico-button').addEventListener('click', exportSocioeconomicoToCsv);
+    document.getElementById('clean-socioeconomico-button').addEventListener('click', deleteSocioeconomicoDB);
     
 });

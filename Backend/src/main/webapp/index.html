@@ -20,6 +20,7 @@
         <div class="option-menu" data-option="users">Usuarios</div>
         <div class="option-menu" data-option="register">Registrar Usuario</div>
         <div class="option-menu" data-option="export">Exportar Datos</div>
+        <div class="option-menu" data-option="socioeconomico">Socioeconómico</div>
         <div class="option-menu" data-option="code-sync">Sincronizar</div>
         <div class="option-menu" data-option="about">Acerca de</div>
         <div class="option-menu option-menu-last" data-option="logout">Cerrar Sesión</div>
@@ -71,7 +72,7 @@
                 </div>    
 
                 <div class="form-group">
-                    <button type="submit">Registrar Usuario</button>
+                    <button type="submit" class="btn-primary">Registrar Usuario</button>
                 </div>
             </form>
         </div>
@@ -101,10 +102,21 @@
             <h2>Exportar Datos a CSV</h2>
             <p>Exporta todos los usuarios registrados a un archivo CSV.</p>
             <p id="export-message"></p>
-            <button id="actualizar-button" class="button-panel">Actualizar</button>
-            <button id="export-button" class="button-panel">Exportar a CSV</button>
-            <button id="clean-button" class="button-panel">Vaciar formularios</button>
+            <button id="actualizar-button" class="btn-tertiary">Actualizar</button>
+            <button id="export-button" class="btn-primary">Exportar a CSV</button>
+            <button id="clean-button" class="btn-secondary">Vaciar formularios</button>
             <div id="export-result" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Sección de Datos Socioeconómicos -->
+        <div id="socioeconomico" class="section option-content">
+            <h2>Datos Socioeconómicos</h2>
+            <p>Gestión de formularios socioeconómicos recibidos del dispositivo móvil.</p>
+            <p id="socioeconomico-message"></p>
+            <button id="actualizar-socioeconomico-button" class="btn-tertiary">Actualizar</button>
+            <button id="export-socioeconomico-button" class="btn-primary">Exportar a CSV</button>
+            <button id="clean-socioeconomico-button" class="btn-secondary">Vaciar registros</button>
+            <div id="export-socioeconomico-result" style="margin-top: 20px;"></div>
         </div>
     </div>
     
@@ -112,8 +124,8 @@
         <div class="modal-content">
             <h2>Cerrar Sesión</h2>
             <p>Estas seguro de cerrar sesion?</p>
-            <button id="logout-button">Cerrar Sesión</button>
-            <button id="cancel-logout-button">Cancelar</button>
+            <button id="logout-button" class="btn-primary">Cerrar Sesión</button>
+            <button id="cancel-logout-button" class="btn-tertiary">Cancelar</button>
         </div>
     </section>
 
@@ -125,8 +137,8 @@
                 <input type="password" id="new-password" name="new-password" required>
                 <label for="confirm-new-password">Confirmar Nueva Contraseña</label>
                 <input type="password" id="confirm-new-password" name="confirm-new-password" required>
-                <button type="submit">Cambiar</button>
-                <button id="cancel-change-password">Cancelar</button>
+                <button type="submit" class="btn-primary">Cambiar</button>
+                <button id="cancel-change-password" class="btn-tertiary">Cancelar</button>
             </form>
         </div>
     </section>
@@ -135,7 +147,7 @@
         <div class="modal-content">
             <h2>Sincronización de Código</h2>
             <h4 id="code-sync-message"></h4>
-            <button id="cancel-code-sync-button">Cancelar</button>
+            <button id="cancel-code-sync-button" class="btn-tertiary">Cancelar</button>
         </div>
     </section>
 
@@ -147,7 +159,7 @@
             <p>Sistema para la recoleccion de datos de evaluacion bucal para investigaciones odontologias</p>
             <p>&copy; Facultad de odontologia - Universidad del Zulia</p>
             <p>&copy; Departamento de tecnologia, informacion y comunicaciones</p>
-            <button id="cancel-about-button">Cerrar</button>
+            <button id="cancel-about-button" class="btn-tertiary">Cerrar</button>
         </div>
     </section>
 

@@ -77,8 +77,8 @@ public class Main{
         */
         /*Inicio del programa para las pruebas
           Hay que cambiar la ruta de dereccion del proyecto para ejecutar*/
-        //String ruta="C:/Users/Sistemas01/Documents/Proyectos/SaludBucalCentral/Backend/src/main/webapp/login.html";
-        String ruta="//home/sistemas01/Documents/Projects/SaludBucalCentral/Backend/src/main/webapp/login.html";
+        String ruta="C:/Users/Sistemas01/Documents/Proyectos/SaludBucalCentral/Backend/src/main/webapp/login.html";
+        //String ruta="//home/sistemas01/Documents/Projects/SaludBucalCentral/Backend/src/main/webapp/login.html";
         File archiveHtml = new File(ruta);
         
         try {
