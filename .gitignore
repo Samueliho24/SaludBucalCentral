@@ -7,15 +7,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+
 Backend/target/
 Backend/Install/
 Backend/Install-old/
+Backend/nbproject/
+Backend/nb-configuration.xml
+Backend/dependency-reduced-pom.xml
 AGENTS.md
 dist
 dist-ssr
 *.local
 Backend/Data.db
-Data.db
+*.db
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
